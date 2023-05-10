@@ -1,0 +1,6 @@
+build/
+prg/
+main.bak
+bcm2835.c.bak
+bcm2835_2.h
+
