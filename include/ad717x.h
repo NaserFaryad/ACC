@@ -527,7 +527,7 @@ typedef struct {
 /*****************************************************************************/
 #define AD717X_CRC8_POLYNOMIAL_REPRESENTATION 0x07 /* x8 + x2 + x + 1 */
 /* Timeout for ADC Conversion */
-#define AD717X_CONV_TIMEOUT			10000
+#define AD717X_CONV_TIMEOUT			100000
 
 #define AD717x_CHANNEL_INPUT_MASK			NO_OS_GENMASK(9,0)
 #define AD717X_CHMAP_REG_SETUP_SEL_MSK  	NO_OS_GENMASK(14,12)

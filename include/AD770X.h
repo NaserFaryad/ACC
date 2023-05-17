@@ -71,8 +71,8 @@
 #define  UNIPOLAR  0x0
 #define  BIPOLAR   0x1
 
-#define  CLK_DIV_1  0x1
-#define  CLK_DIV_2  0x2
+#define  CLK_DIV_1  0x0
+#define  CLK_DIV_2  0x1
 
 
 int AD7706_SPI_Init();

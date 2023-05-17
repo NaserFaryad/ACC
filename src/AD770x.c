@@ -111,7 +111,7 @@ double readADResultDouble(spi_device *spi_dev, uint8_t channel, float refOffset,
     ad_result_uint = readADResultUnsignedInt(spi_dev);
     bcm2835_gpio_write(AD7706_CS, HIGH);
 
-    result = (double) ad_result_uint * 1.0 / 65536.0 * VRef - refOffset;
+    result = (double) ((double)ad_result_uint-32768) * 1.0 / 32768.0 * VRef - refOffset;
 
     return result;
 }
@@ -119,12 +119,27 @@ double readADResultDouble(spi_device *spi_dev, uint8_t channel, float refOffset,
 bool dataReady(spi_device *spi_dev, uint8_t channel) {
     uint8_t b1 = 0x0;
 
-    bcm2835_gpio_write(AD7706_CS, LOW);
-    setNextOperation(spi_dev, REG_CMM, channel, 1);
-    b1 = spiTransfer(spi_dev, 0x0);
-    bcm2835_gpio_write(AD7706_CS, HIGH);
+    uint8_t ready = 0;
+    uint32_t timeout = 500;
+    int TIMEOUT = -3;
 
-    return (b1 & 0x80) == 0x0;
+    uint8_t pin_value;
+
+    // while(!ready && --timeout) {
+	// 	ready = bcm2835_gpio_lev(RPI_V2_GPIO_P1_13);
+	// }
+
+	// return timeout ? 0 : TIMEOUT;
+    ready = bcm2835_gpio_lev(RPI_V2_GPIO_P1_13);
+
+    return ! ready;
+
+    // bcm2835_gpio_write(AD7706_CS, LOW);
+    // setNextOperation(spi_dev, REG_CMM, channel, 1);
+    // b1 = spiTransfer(spi_dev, 0x0);
+    // bcm2835_gpio_write(AD7706_CS, HIGH);
+
+    // return (b1 & 0x80) == 0x0;
 }
 
 void ad7706Reset(spi_device *spi_dev) {
@@ -136,6 +151,10 @@ void ad7706Reset(spi_device *spi_dev) {
 
 
 void ad7706Init(spi_device *spi_dev, uint8_t channel, uint8_t clkDivider, uint8_t polarity, uint8_t gain, uint8_t updRate) {
+    bcm2835_gpio_fsel(RPI_V2_GPIO_P1_13, BCM2835_GPIO_FSEL_INPT);  // set pin 13 to Input
+
+
+
     bcm2835_gpio_write(AD7706_CS, LOW);
     setNextOperation(spi_dev, REG_CLOCK, channel, 0);
     writeClockRegister(spi_dev, 0, clkDivider, updRate);

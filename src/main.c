@@ -288,6 +288,9 @@ int Static_Init(ad717x_dev **device) {
 
     WriteRegister(dev, AD717X_ADCMODE_REG, 0xA710);
 
+
+    WriteRegister(dev, AD717X_FILTCON0_REG, 0x507);
+
     *device = dev;
 
     return ret;
@@ -295,8 +298,17 @@ int Static_Init(ad717x_dev **device) {
 
 int Static_Read(ad717x_dev *dev, int32_t *adc_data) {
     int ret = 0;
-    ret = ad717x_single_read(dev, CHANNEL_ID_0, adc_data);
-    if (ret < 0) return ret;
+    int32_t adc_data_temp = 0;
+    int32_t adc_data_sum = 0;
+    int counter = 0;
+    for(int i=0; i<10000; i++) {
+        ret = ad717x_single_read(dev, CHANNEL_ID_0, &adc_data_temp);
+        if (ret < 0) return ret;
+        adc_data_sum += adc_data_temp;
+        counter++;
+    }
+    *adc_data = adc_data_sum / counter;
+    return 0;
 }
 
 int Dynamic_Init(ad717x_dev **device) {
@@ -374,7 +386,7 @@ int Dynamic_Init(ad717x_dev **device) {
 	ret = ad717x_set_adc_mode(dev, CONTINUOUS);
 	if (ret < 0) return ret;
 
-    WriteRegister(dev, AD717X_FILTCON0_REG, 0x564);  // Filter 0 Register
+    WriteRegister(dev, AD717X_FILTCON0_REG, 0x567);  // Filter 0 Register
     // PrintData(dev, AD717X_FILTCON0_REG);
 
     WriteRegister(dev, AD717X_ADCMODE_REG, 0xA000);  // ADC Mode Register
@@ -481,70 +493,94 @@ int Square_Gen(struct ad9833_dev *dev) {
 }
 
 int AD7706_Init() {
+    int ret = 0;
     spi_device *spi_dev;
-    double result = 0;
+    double sum_ch1 = 0;
+    double sum_ch2 = 0;
+    double avg_ch1 = 0;
+    double avg_ch2 = 0;
+    double current_P15 = 0;
+    double current_N15 = 0;
 
-    Aux_Spi_Init(&spi_dev, 10000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS1);
-    // uint8_t txb[4] = {0x0, 0x0, 0x0, 0x0};
-    // uint8_t rxb[4] = {0x0, 0x0, 0x0, 0x0};
-    // txb[0] = (uint8_t) 0b00101000;
-
-    // for (int i=0; i<10; i++) {
-    //     bcm2835_gpio_write(AD7706_CS, LOW);
-    //     bcm2835_delay(1);
-
-    //     bcm2835_gpio_write(AD7706_CS, HIGH);
-    //     bcm2835_delay(1);
-    // }
-    // return -3;
-    // ad7706Reset(spi_dev);
-
-    // bcm2835_gpio_write(AD7706_CS, LOW);
-    // spidev_transfer(spi_dev, txb, rxb, 4);
-    // bcm2835_gpio_write(AD7706_CS, HIGH);
-    // for(int i=0; i<4; i++)
-    //     printf("%02X ", rxb[i]);
+    Aux_Spi_Init(&spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS_NONE);
+    ad7706Reset(spi_dev);
+    ad7706Init(spi_dev, CHN_AIN1, CLK_DIV_1, UNIPOLAR, GAIN_1, UPDATE_RATE_50);
+    ad7706Init(spi_dev, CHN_AIN2, CLK_DIV_1, UNIPOLAR, GAIN_1, UPDATE_RATE_50);
     
-    // printf("\n");
+    int i = 0;
+    while (1) {
+        sum_ch1 = 0;
+        sum_ch2 = 0;
+        double start_time = clock();
+        for(i = 0; i< 12; i++){
+            sum_ch1 = sum_ch1 + readADResultDouble(spi_dev, CHN_AIN1, 0, 1.225);
+        }
+        for(i = 0; i< 12; i++){
+            sum_ch2 = sum_ch2 + readADResultDouble(spi_dev, CHN_AIN2, 0, 1.225);
+        }
+        double stop_time = clock();
+        avg_ch1 = sum_ch1 / i;
+        avg_ch2 = sum_ch2 / i;
+        current_P15 = (avg_ch1 + 0) / 5.6;
+        current_N15 = (avg_ch2 + 0) / 5.6;
+        printf("channel 1 = %f  ", current_P15);
+        printf("channel 2 = %f  ", current_N15);
+        printf("time = %f\n",(stop_time - start_time)/CLOCKS_PER_SEC);
+        // bcm2835_delay(100);
+    }
+    // ad7706InitDefaultParams(spi_dev, CHN_COMM);
+    // double resss = readADResultDouble(spi_dev, CHN_COMM, 0, 1.225);
+    // setNextOperation(spi_dev, REG_CLOCK, 0, 1);
+    // bcm2835_gpio_write(AD7706_CS, LOW);
+    // uint8_t b111 = spiTransfer(spi_dev, 0x00);
+    // bcm2835_gpio_write(AD7706_CS, HIGH);
+    // printf("-_-_->%02X\n", b111);
+    // // printf("AD7706 Result=%f\n", resss);
+
+    // return -199;
+    // bcm2835_gpio_fsel(RPI_V2_GPIO_P1_13, BCM2835_GPIO_FSEL_INPT);  // 
+    // uint8_t pin_val = 0;
+    
+
+
+    // uint8_t txcmdd[1] = {0b00010000};
+    // uint8_t rxcmdd[1] = {0x0};
 
     // bcm2835_gpio_write(AD7706_CS, LOW);
-    // setNextOperation(spi_dev, REG_CLOCK, 0, 1);
-    // uint8_t b1 = spiTransfer(spi_dev, 0x0);
-    // // uint8_t b2 = spiTransfer(spi_dev, 0x0);
-    // // uint8_t b3 = spiTransfer(spi_dev, 0x0);
+    // spidev_transfer(spi_dev, txcmdd, rxcmdd, 1);
+    // bcm2835_delayMicroseconds(10);
     // bcm2835_gpio_write(AD7706_CS, HIGH);
 
-    // printf("-> %02X \n", b1);
-    ad7706InitDefaultParams(spi_dev, CHN_AIN2);
-    ad7706Init(spi_dev, CHN_AIN2, CLK_DIV_1, UNIPOLAR, GAIN_1, UPDATE_RATE_25);
+    // // while(bcm2835_gpio_lev(RPI_V2_GPIO_P1_13) == 1);
+    // // bcm2835_delayMicroseconds(10);
+    // uint8_t datatxx[1] = {0x01};
+    // uint8_t datarxx[1] = {0x0};
+    // bcm2835_gpio_write(AD7706_CS, LOW);
+    // spidev_transfer(spi_dev, datatxx, datarxx, 1);
+    // bcm2835_delayMicroseconds(10);
+    // bcm2835_gpio_write(AD7706_CS, HIGH);
 
-    // while (1) {
-    //     result = readADResultDouble(spi_dev, CHN_AIN1, 0, 2.5);
-    //     printf("result=%f\n", result);
-    //     // bcm2835_delay(100);
-    // }
 
-    unsigned int ad_result_uint = 0;
-    // float refOffset = 0.0;
 
-    // while (1) {
-    //     while (!dataReady(spi_dev, CHN_AIN2)) {
-    //     };
-
-    //     bcm2835_gpio_write(AD7706_CS, LOW);
-    //     setNextOperation(spi_dev, REG_DATA, CHN_AIN2, 1);
-    //     ad_result_uint = readADResultUnsignedInt(spi_dev);
-    //     bcm2835_gpio_write(AD7706_CS, HIGH);
-
-    //     printf("%u\n", ad_result_uint);
-    // }
-
-    // uint8_t r = CLKDIS << 4 | CLKDIV << 3 | outputUpdateRate;
-
-    // r &= ~(1 << 2); // clear CLK
+    // uint8_t txcmd[1] = {0b00101000};
+    // uint8_t rxcmd[1] = {0x0};
 
     // bcm2835_gpio_write(AD7706_CS, LOW);
-    // spiTransfer(spi_dev, r);
+    // spidev_transfer(spi_dev, txcmd, rxcmd, 1);
+    // bcm2835_delayMicroseconds(10);
+    // bcm2835_gpio_write(AD7706_CS, HIGH);
+
+    // while(bcm2835_gpio_lev(RPI_V2_GPIO_P1_13) == 1);
+
+    uint8_t datatx[1] = {0x0};
+    uint8_t datarx[1] = {0x0};
+    bcm2835_gpio_write(AD7706_CS, LOW);
+    spidev_transfer(spi_dev, datatx, datarx, 1);
+    bcm2835_delayMicroseconds(10);
+    bcm2835_gpio_write(AD7706_CS, HIGH);
+
+    printf("---> %02X\n", datarx[0]);
+
 
     Aux_Spi_Free(spi_dev);
 
@@ -553,8 +589,8 @@ int AD7706_Init() {
 int main()
 {  
 
-    // AD7706_Init();
-    // return -1233;
+    AD7706_Init();
+    return -1233;
 
     ad717x_dev *dev;
     struct ad9833_dev *ad9833_dev;
@@ -585,23 +621,31 @@ int main()
             int32_t data = 0;
             int counter = 0;
             double sum = 0;
-            while (1) {
-                ret = Static_Read(dev, &data);
-                if (ret < 0) {
-                    printf("Error in reading value.\n");
-                    return ret;
-                }
-                counter++;
-                if(counter > 100) {
-                    counter = 0;
-
-                    PrintData(dev, AD717X_DATA_REG);
-
-                    printf("Average= %f\n", (sum/200) * (2.5/(0.75*8388608)) / 1.333333);
-                    sum = 0;
-                }
-                sum += data;
+            double ct = clock();
+            ret = Static_Read(dev, &data);
+            if (ret < 0) {
+                printf("Error in reading value.\n");
+                return ret;
             }
+            double el = clock() - ct;
+            printf("Elapsed Time: %f\n", el/CLOCKS_PER_SEC);
+            // while (1) {
+            //     ret = Static_Read(dev, &data);
+            //     if (ret < 0) {
+            //         printf("Error in reading value.\n");
+            //         return ret;
+                // }
+                //counter++;
+                // if(counter > 100) {
+                //     counter = 0;
+
+                //     PrintData(dev, AD717X_DATA_REG);
+
+                //     printf("Average= %f\n", (sum/200) * (2.5/(0.75*8388608)) / 1.333333);
+                //     sum = 0;
+                // }
+                // sum += data;
+            // }
 
             break;
         
@@ -619,7 +663,7 @@ int main()
             double current_time = clock();
             // bcm2835_gpio_write(AD7175_2_CS_PIN, LOW);
             AD717X_ComputeDataregSize(dev);
-            while (cont_counter < 20000) {
+            while (cont_counter < 10000) {
                 ret = AD717X_WaitForReady(dev, AD717X_CONV_TIMEOUT);
                 if (ret < 0)
                     return ret;
@@ -629,7 +673,7 @@ int main()
                     return ret;
                 }
                 // printf("ADC Raw Data (CONTINOUS)=%d\n", cont_data);
-                printf("ADC Raw Data (CONTINOUS)=%f\n", (cont_data/2) * (2.5/(0.75*8388608)) / 1.333333);
+                // printf("ADC Raw Data (CONTINOUS)=%f\n", (cont_data/2) * (2.5/(0.75*8388608)) / 1.333333);
                 cont_counter++;
             }
 
