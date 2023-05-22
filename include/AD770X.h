@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <bcm2835_2.h>
+#include <bcm2835.h>
 #include "spidev_lib.h"
 
 /*

@@ -32,7 +32,7 @@
 #ifndef _DEV_CONFIG_H_
 #define _DEV_CONFIG_H_
 
-#include <bcm2835_2.h>
+#include <bcm2835.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <linux/spi/spidev.h>

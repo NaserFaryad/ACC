@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <linux/const.h>
-#include "bcm2835_2.h"
+#include "bcm2835.h"
 
 
 typedef enum

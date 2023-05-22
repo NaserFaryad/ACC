@@ -45,7 +45,7 @@
 /***************************** Include Files **********************************/
 /******************************************************************************/
 #include <stdlib.h>
-#include <bcm2835_2.h>
+#include <bcm2835.h>
 #include "ad717x.h"
 // #include "no_os_error.h"
 // #include "no_os_alloc.h"

@@ -44,7 +44,7 @@
 /******************************* Include Files ********************************/
 /******************************************************************************/
 #include <stdint.h>
-#include <bcm2835_2.h>
+#include <bcm2835.h>
 #include "DEV_Config.h"
 #include "spidev_lib.h"
 // #include "no_os_delay.h"

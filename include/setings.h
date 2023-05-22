@@ -2,7 +2,7 @@
 #define SETINGS_H
 
 
-#include <bcm2835_2.h>
+#include <bcm2835.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <linux/spi/spidev.h>

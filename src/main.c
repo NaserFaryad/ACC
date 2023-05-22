@@ -6,8 +6,6 @@
 #include "DEV_Config.h"
 #include "ad7175_2_regs.h"
 #include "ad9833.h"
-#include "ad9833_test.h"
-#include "ad7706brz.h"
 #include "AD770X.h"
 #include "spidev_lib.h"
 
