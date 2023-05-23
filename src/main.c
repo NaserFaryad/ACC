@@ -7,6 +7,7 @@
 #include "ad7175_2_regs.h"
 #include "ad9833.h"
 #include "AD770X.h"
+#include "max31865.h"
 #include "spidev_lib.h"
 
 
@@ -269,7 +270,7 @@ int Static_Init(ad717x_dev **device) {
     ret = ad717x_connect_analog_input(dev, CHANNEL_ID_0, channel0Input);
     if (ret < 0) return ret;
 
-    ret = ad717x_set_polarity(dev, false, SETUP_ID_0);  // bipolar or unipolar -> true: bipolar, false: unipolar
+    ret = ad717x_set_polarity(dev, true, SETUP_ID_0);  // bipolar or unipolar -> true: bipolar, false: unipolar
     if (ret < 0) return ret;
 
     ret = ad717x_set_reference_source(dev, INTERNAL_REF, SETUP_ID_0);  // set INTERNAL_REF for setup 0
@@ -284,10 +285,12 @@ int Static_Init(ad717x_dev **device) {
     ret = ad717x_assign_setup(dev, CHANNEL_ID_0, SETUP_ID_0);  // Assign setup 0 to channel 0
     if (ret < 0) return ret;
 
-    WriteRegister(dev, AD717X_ADCMODE_REG, 0xA710);
+    WriteRegister(dev, AD717X_ADCMODE_REG, 0xA010);
 
 
-    WriteRegister(dev, AD717X_FILTCON0_REG, 0x507);
+    WriteRegister(dev, AD717X_FILTCON0_REG, 0x572);
+
+    // WriteRegister(dev, AD717X_SETUPCON0_REG, 0x1F20); // TEMP
 
     *device = dev;
 
@@ -299,7 +302,8 @@ int Static_Read(ad717x_dev *dev, int32_t *adc_data) {
     int32_t adc_data_temp = 0;
     int32_t adc_data_sum = 0;
     int counter = 0;
-    for(int i=0; i<10000; i++) {
+    while(counter < 5)
+    {
         ret = ad717x_single_read(dev, CHANNEL_ID_0, &adc_data_temp);
         if (ret < 0) return ret;
         adc_data_sum += adc_data_temp;
@@ -531,11 +535,103 @@ int AD7706_Init() {
 
 }
 
+
+int max31865_Init() {
+    int ret = 0;
+    spi_device *spi_dev;
+
+    struct max31865_dev *max31865_dev;
+    struct max31865_init_param init_param;
+
+    ret = Aux_Spi_Init(&spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS2);
+    if (ret<0) return ret;
+
+    init_param.spi_init = spi_dev;
+    init_param.rtd_rc = 0.12f;  // TODO
+
+    
+
+
+    ret = max31865_init(&max31865_dev, init_param);
+    if (ret<0) return ret;
+
+    
+
+    ret = max31865_set_wires(max31865_dev, false); // true: 3-wires, false: 4-wires
+
+    max31865_auto_convert(max31865_dev, true);
+
+    max31865_set_threshold(max31865_dev, 0x0, 0xFFFF);
+
+    max31865_enable_50Hz(max31865_dev, true);  // true: 50Hz, false: 60Hz
+
+    max31865_clear_fault(max31865_dev);
+
+
+    uint16_t upv = 0;
+    max31865_get_upper_threshold(max31865_dev, &upv);
+    printf("Upper value= %d\n", upv);
+
+    uint8_t rdata = 0;
+    max31865_read(max31865_dev, MAX31865_HFAULTMSB_REG, &rdata);
+    printf("Register data= %02X\n", rdata);
+
+
+    bcm2835_gpio_fsel(RPI_V2_GPIO_P1_32, BCM2835_GPIO_FSEL_INPT);  // set pin 32 to INPUT
+
+    uint8_t ready;
+
+    // while(bcm2835_gpio_lev(RPI_V2_GPIO_P1_13)){};
+    uint16_t raw_val = 0;
+    uint8_t fault;
+
+    while (1) {
+        ret = max31865_read_rtd(max31865_dev, &raw_val);
+        if(ret<0) return ret;
+        printf("raw value= %d\n", raw_val);
+        continue;
+
+
+        fault = max31865_read_fault(max31865_dev, MAX31865_FAULT_AUTO);
+        if (fault) {
+            printf("Fault 0x"); 
+            printf("%02X\n", fault);
+            
+            if (fault & MAX31865_FAULT_HIGHTHRESH) {
+                printf("RTD High Threshold\n"); 
+            }
+            if (fault & MAX31865_FAULT_LOWTHRESH) {
+                printf("RTD Low Threshold\n"); 
+            }
+            if (fault & MAX31865_FAULT_REFINLOW) {
+                printf("REFIN- > 0.85 x Bias\n"); 
+            }
+            if (fault & MAX31865_FAULT_REFINHIGH) {
+                printf("REFIN- < 0.85 x Bias - FORCE- open\n"); 
+            }
+            if (fault & MAX31865_FAULT_RTDINLOW) {
+                printf("RTDIN- < 0.85 x Bias - FORCE- open\n"); 
+            }
+            if (fault & MAX31865_FAULT_OVUV) {
+                printf("Under/Over voltage\n"); 
+            }
+
+            max31865_clear_fault(max31865_dev);
+        }
+    }
+    ret = max31865_remove(max31865_dev);
+    if (ret<0) return ret;
+
+    return 0;
+}
+
+
 int main()
 {  
-
-    AD7706_Init();
-    return -1233;
+    max31865_Init();
+    return -999;
+    // AD7706_Init();
+    // return -1233;
 
     ad717x_dev *dev;
     struct ad9833_dev *ad9833_dev;
@@ -563,34 +659,17 @@ int main()
                 return ret;
             }
             
-            int32_t data = 0;
-            int counter = 0;
-            double sum = 0;
-            double ct = clock();
-            ret = Static_Read(dev, &data);
-            if (ret < 0) {
+            int32_t adc_data = 0;
+            ret = Static_Read(dev, &adc_data);
+            if(ret<0) {
                 printf("Error in reading value.\n");
                 return ret;
             }
-            double el = clock() - ct;
-            printf("Elapsed Time: %f\n", el/CLOCKS_PER_SEC);
-            // while (1) {
-            //     ret = Static_Read(dev, &data);
-            //     if (ret < 0) {
-            //         printf("Error in reading value.\n");
-            //         return ret;
-                // }
-                //counter++;
-                // if(counter > 100) {
-                //     counter = 0;
+            //double real_voltage = (adc_data/2) * (2.5/(0.75*8388608)) / 1.333333; // unipolar conversion
+            double real_voltage = (double) ((((double) adc_data) - 8388608)*2.5) /(8388608) ;
 
-                //     PrintData(dev, AD717X_DATA_REG);
-
-                //     printf("Average= %f\n", (sum/200) * (2.5/(0.75*8388608)) / 1.333333);
-                //     sum = 0;
-                // }
-                // sum += data;
-            // }
+            printf("real_voltage %f\n", real_voltage);
+            
 
             break;
         
