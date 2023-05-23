@@ -526,60 +526,7 @@ int AD7706_Init() {
         printf("time = %f\n",(stop_time - start_time)/CLOCKS_PER_SEC);
         // bcm2835_delay(100);
     }
-    // ad7706InitDefaultParams(spi_dev, CHN_COMM);
-    // double resss = readADResultDouble(spi_dev, CHN_COMM, 0, 1.225);
-    // setNextOperation(spi_dev, REG_CLOCK, 0, 1);
-    // bcm2835_gpio_write(AD7706_CS, LOW);
-    // uint8_t b111 = spiTransfer(spi_dev, 0x00);
-    // bcm2835_gpio_write(AD7706_CS, HIGH);
-    // printf("-_-_->%02X\n", b111);
-    // // printf("AD7706 Result=%f\n", resss);
-
-    // return -199;
-    // bcm2835_gpio_fsel(RPI_V2_GPIO_P1_13, BCM2835_GPIO_FSEL_INPT);  // 
-    // uint8_t pin_val = 0;
     
-
-
-    // uint8_t txcmdd[1] = {0b00010000};
-    // uint8_t rxcmdd[1] = {0x0};
-
-    // bcm2835_gpio_write(AD7706_CS, LOW);
-    // spidev_transfer(spi_dev, txcmdd, rxcmdd, 1);
-    // bcm2835_delayMicroseconds(10);
-    // bcm2835_gpio_write(AD7706_CS, HIGH);
-
-    // // while(bcm2835_gpio_lev(RPI_V2_GPIO_P1_13) == 1);
-    // // bcm2835_delayMicroseconds(10);
-    // uint8_t datatxx[1] = {0x01};
-    // uint8_t datarxx[1] = {0x0};
-    // bcm2835_gpio_write(AD7706_CS, LOW);
-    // spidev_transfer(spi_dev, datatxx, datarxx, 1);
-    // bcm2835_delayMicroseconds(10);
-    // bcm2835_gpio_write(AD7706_CS, HIGH);
-
-
-
-    // uint8_t txcmd[1] = {0b00101000};
-    // uint8_t rxcmd[1] = {0x0};
-
-    // bcm2835_gpio_write(AD7706_CS, LOW);
-    // spidev_transfer(spi_dev, txcmd, rxcmd, 1);
-    // bcm2835_delayMicroseconds(10);
-    // bcm2835_gpio_write(AD7706_CS, HIGH);
-
-    // while(bcm2835_gpio_lev(RPI_V2_GPIO_P1_13) == 1);
-
-    uint8_t datatx[1] = {0x0};
-    uint8_t datarx[1] = {0x0};
-    bcm2835_gpio_write(AD7706_CS, LOW);
-    spidev_transfer(spi_dev, datatx, datarx, 1);
-    bcm2835_delayMicroseconds(10);
-    bcm2835_gpio_write(AD7706_CS, HIGH);
-
-    printf("---> %02X\n", datarx[0]);
-
-
     Aux_Spi_Free(spi_dev);
 
 }
