@@ -536,6 +536,71 @@ int AD7706_Init() {
 }
 
 
+// The value of the Rref resistor. Use 430.0 for PT100 and 4300.0 for PT1000
+#define RREF      4120.0
+// The 'nominal' 0-degrees-C resistance of the sensor
+// 100.0 for PT100, 1000.0 for PT1000
+#define RNOMINAL  1000.0
+
+#define RTD_A 3.9083e-3
+#define RTD_B -5.775e-7
+
+
+
+/**************************************************************************/
+/*!
+    @brief Calculate the temperature in C from the RTD through calculation of
+   the resistance. Uses
+   http://www.analog.com/media/en/technical-documentation/application-notes/AN709_0.pdf
+   technique
+    @param RTDraw The raw 16-bit value from the RTD_REG
+    @param RTDnominal The 'nominal' resistance of the RTD sensor, usually 100
+    or 1000
+    @param refResistor The value of the matching reference resistor, usually
+    430 or 4300
+    @returns Temperature in C
+*/
+/**************************************************************************/
+float calculateTemperature(uint16_t RTDraw, float RTDnominal, float refResistor) {
+  float Z1, Z2, Z3, Z4, Rt, temp;
+
+  Rt = RTDraw;
+  Rt /= 32768;
+  Rt *= refResistor;
+
+  // Serial.print("\nResistance: "); Serial.println(Rt, 8);
+
+  Z1 = -RTD_A;
+  Z2 = RTD_A * RTD_A - (4 * RTD_B);
+  Z3 = (4 * RTD_B) / RTDnominal;
+  Z4 = 2 * RTD_B;
+
+  temp = Z2 + (Z3 * Rt);
+  temp = (sqrt(temp) + Z1) / Z4;
+
+  if (temp >= 0)
+    return temp;
+
+  // ugh.
+  Rt /= RTDnominal;
+  Rt *= 100; // normalize to 100 ohm
+
+  float rpoly = Rt;
+
+  temp = -242.02;
+  temp += 2.2228 * rpoly;
+  rpoly *= Rt; // square
+  temp += 2.5859e-3 * rpoly;
+  rpoly *= Rt; // ^3
+  temp -= 4.8260e-6 * rpoly;
+  rpoly *= Rt; // ^4
+  temp -= 2.8183e-8 * rpoly;
+  rpoly *= Rt; // ^5
+  temp += 1.5243e-10 * rpoly;
+
+  return temp;
+}
+
 int max31865_Init() {
     int ret = 0;
     spi_device *spi_dev;
@@ -547,7 +612,7 @@ int max31865_Init() {
     if (ret<0) return ret;
 
     init_param.spi_init = spi_dev;
-    init_param.rtd_rc = 0.12f;  // TODO
+    init_param.rtd_rc = 0.0095f;  // TODO
 
     
 
@@ -559,25 +624,17 @@ int max31865_Init() {
 
     ret = max31865_set_wires(max31865_dev, false); // true: 3-wires, false: 4-wires
 
+    max31865_enable_bias(max31865_dev, false);
     max31865_auto_convert(max31865_dev, true);
 
-    max31865_set_threshold(max31865_dev, 0x0, 0xFFFF);
+    max31865_set_threshold(max31865_dev, 0x0, (uint16_t)0xFFFF);
 
-    max31865_enable_50Hz(max31865_dev, true);  // true: 50Hz, false: 60Hz
+    // max31865_enable_50Hz(max31865_dev, true);  // true: 50Hz, false: 60Hz
+    // 
 
     max31865_clear_fault(max31865_dev);
 
-
-    uint16_t upv = 0;
-    max31865_get_upper_threshold(max31865_dev, &upv);
-    printf("Upper value= %d\n", upv);
-
-    uint8_t rdata = 0;
-    max31865_read(max31865_dev, MAX31865_HFAULTMSB_REG, &rdata);
-    printf("Register data= %02X\n", rdata);
-
-
-    bcm2835_gpio_fsel(RPI_V2_GPIO_P1_32, BCM2835_GPIO_FSEL_INPT);  // set pin 32 to INPUT
+    // bcm2835_gpio_fsel(RPI_V2_GPIO_P1_32, BCM2835_GPIO_FSEL_INPT);  // set pin 32 to INPUT
 
     uint8_t ready;
 
@@ -585,12 +642,17 @@ int max31865_Init() {
     uint16_t raw_val = 0;
     uint8_t fault;
 
+    float ratio = 0.00f;
+    int i = 0;
     while (1) {
         ret = max31865_read_rtd(max31865_dev, &raw_val);
         if(ret<0) return ret;
-        printf("raw value= %d\n", raw_val);
-        continue;
-
+        // printf("raw value= %d\n", raw_val);
+        ratio = (float) raw_val / 32768.0f;
+        printf("Resistor= %f\n", RREF * ratio);
+        // float temp = ((float)raw_val / 32768.0) * 425.0;
+        // printf("%f\n", temp);
+        printf("Tempreature= %f\n", calculateTemperature(raw_val, RNOMINAL, RREF));
 
         fault = max31865_read_fault(max31865_dev, MAX31865_FAULT_AUTO);
         if (fault) {
