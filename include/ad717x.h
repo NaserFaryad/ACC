@@ -535,7 +535,9 @@ typedef struct {
 #define AD717X_CHMAP_REG_AINNEG_MSK    		NO_OS_GENMASK(4,0)
 #define AD717X_ADCMODE_REG_MODE_MSK   		NO_OS_GENMASK(6,4)
 #define AD717X_SETUP_CONF_REG_REF_SEL_MSK	NO_OS_GENMASK(5,4)
-#define AD717x_ODR_MSK				NO_OS_GENMASK(4,0)
+#define AD717x_ODR_MSK						NO_OS_GENMASK(4,0)
+#define AD717x_ENHFILT_MSK				    NO_OS_GENMASK(10,8)
+#define AD717x_ORDER_MSK				    NO_OS_GENMASK(6,5)
 
 /*****************************************************************************/
 /************************ Functions Declarations *****************************/
@@ -621,4 +623,6 @@ int ad717x_single_read(ad717x_dev* device, uint8_t id,
 int32_t ad717x_configure_device_odr(ad717x_dev *dev, uint8_t filtcon_id,
 				    uint8_t odr_sel);
 
+//Extra
+int AD717X_config_filter(ad717x_dev *dev, uint8_t filtcon_id, struct ad717x_filtcon filter);
 #endif /* __AD717X_H__ */

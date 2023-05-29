@@ -936,3 +936,57 @@ int32_t AD717X_remove(ad717x_dev *dev)
 
 	return ret;
 }
+
+
+// Extra
+/**
+ * @brief Configure Filter for the device
+ * @param dev - The AD717x Device descriptor
+ * @param filtcon_id - Filter Configuration Register ID (Number)
+ * @param filter - ad717x_filtcon struct
+ * @return 0 in case of success, negative error code otherwise
+ */
+int AD717X_config_filter(ad717x_dev *dev, uint8_t filtcon_id, struct ad717x_filtcon filter) {
+    ad717x_st_reg *filtcon_reg;
+    int32_t ret;
+
+    /* Retrieve the FILTCON register */
+    filtcon_reg = AD717X_GetReg(dev,
+                    AD717X_FILTCON0_REG + filtcon_id);
+    if (!filtcon_reg) {
+        return -EINVAL;
+    }
+
+    /* Clear the ODR bits, configure the requested ODR */
+    filtcon_reg->value &= ~(AD717x_ODR_MSK);
+    filtcon_reg->value |= AD717X_FILT_CONF_REG_ODR(filter.odr);
+
+
+    if (filter.sinc3_map){
+        /* Clear the SINC3_MAP, configure the requested SINC3_MAP */
+        filtcon_reg->value &= ~(AD717X_FILT_CONF_REG_SINC3_MAP);
+        filtcon_reg->value |= AD717X_FILT_CONF_REG_SINC3_MAP;
+    }
+
+    if (filter.enhfilten) {
+        /* Clear the ENHFILTEN, configure the requested ENHFILTEN */
+        filtcon_reg->value &= ~(AD717X_FILT_CONF_REG_ENHFILTEN);
+        filtcon_reg->value |= AD717X_FILT_CONF_REG_ENHFILTEN;
+
+        /* Clear the ENHFILT bits, configure the requested ENHFILT */
+        filtcon_reg->value &= ~(AD717x_ENHFILT_MSK);
+        filtcon_reg->value |= AD717X_FILT_CONF_REG_ENHFILT(filter.enhfilt);
+    }
+
+    /* Clear the ENHFILT bits, configure the requested ENHFILT */
+    filtcon_reg->value &= ~(AD717x_ORDER_MSK);
+    filtcon_reg->value |= AD717X_FILT_CONF_REG_ORDER(filter.oder);
+
+    ret = AD717X_WriteRegister(dev, AD717X_FILTCON0_REG + filtcon_id);
+    if (ret) {
+        return ret;
+    }
+
+    return 0;
+
+}
