@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>NumIndic.qml</file>
+        <file>ParameterTab.qml</file>
+        <file>CalibrationTab.qml</file>
+        <file>ContinousLogging.qml</file>
+        <file>KeboardPopup.qml</file>
+        <file>PushBottun.qml</file>
+        <file>FloatKeyboard.qml</file>
+    </qresource>
+</RCC>
