@@ -463,6 +463,7 @@ ApplicationWindow {
             height: 100
             button_name: "Dynamic"
             txtSize: 16
+            visibleNumber: false
             display: "0.00"
             onCliked: {
                 console.log("Dynamic Clicked")
@@ -480,7 +481,7 @@ ApplicationWindow {
     NumIndic
     {
         id: sensCurrentP
-        labelText: "Current [+A]"
+        labelText: "Current [+15]"
         labelSize: 14
         width: 250
         height: 50
@@ -527,6 +528,19 @@ ApplicationWindow {
             y: 0
             width: 200
             height: parent.height
+            text: qsTr("Continuous")
+            anchors.verticalCenter: parent.verticalCenter
+            font.pointSize: 14
+            onClicked:
+            {
+                bridge.static_real_time_start()
+                col.enabled = false
+            }
+        }
+        TabButton {
+            y: 0
+            width: 200
+            height: parent.height
             text: qsTr("Calibration")
             anchors.verticalCenter: parent.verticalCenter
             font.pointSize: 14
@@ -539,25 +553,12 @@ ApplicationWindow {
             y: 0
             width: 200
             height: parent.height
-            text: qsTr("Continuous Logging")
+            text: qsTr("Debug")
             anchors.verticalCenter: parent.verticalCenter
             font.pointSize: 14
             onClicked: {
                 col.enabled = true
                 bridge.static_real_time_stop()
-            }
-        }
-        TabButton {
-            y: 0
-            width: 200
-            height: parent.height
-            text: qsTr("Real-Time Reading")
-            anchors.verticalCenter: parent.verticalCenter
-            font.pointSize: 14
-            onClicked:
-            {
-                bridge.static_real_time_start()
-                col.enabled = false
             }
         }
         TabButton {
@@ -636,7 +637,7 @@ ApplicationWindow {
                         y: 430
                         text: qsTr("Reset")
                         onClicked: {
-
+                            bridge.dummy()
                             gp_flag = false
                             gn_flag = false
                             zp_flag = false
@@ -716,6 +717,25 @@ ApplicationWindow {
             }
         }
         Item {
+            id: logTab
+            Rectangle
+            {
+                color: "white"
+                anchors.fill: parent
+                NumIndic {
+                    id: static_real_time
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 450
+                    height: 100
+                    labelText: "Voltage [V]"
+                    indicText: "0.000000"
+                    textSize: 42
+                    labelSize: 24
+                }
+            }
+        }
+        Item {
 
             Rectangle
             {
@@ -780,25 +800,6 @@ ApplicationWindow {
             }
         }
         Item {
-            id: logTab
-            Rectangle
-            {
-                color: "white"
-                anchors.fill: parent
-                NumIndic {
-                    id: static_real_time
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 400
-                    height: 100
-                    labelText: "Voltage [V]"
-                    indicText: "0.000000"
-                    textSize: 42
-                    labelSize: 24
-                }
-            }
-        }
-        Item {
             id: readmeTab
             Rectangle
             {
@@ -835,7 +836,7 @@ ApplicationWindow {
         y: 30
         width: 250
         height: 50
-        labelText: "Current [-A]"
+        labelText: "Current [-15]"
         labelSize: 14
     }
 
