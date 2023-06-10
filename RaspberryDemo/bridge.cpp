@@ -68,7 +68,7 @@ void Bridge::dynamic_test_values(QVariantList data)
 void Bridge::static_real_time_value(double value)
 {
     qInfo() << "Bridge>> Static Real Time Value: " << value;
-    emit static_real_time_ready(value);
+    emit static_real_time_ready(value * gain + offset);
 }
 
 void Bridge::static_real_time_stop()
