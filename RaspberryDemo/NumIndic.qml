@@ -19,6 +19,7 @@ Item {
     property bool labelBold: false
     property bool textBold: true
 
+
     Rectangle
     {
         id: rectangle
@@ -43,7 +44,7 @@ Item {
         Rectangle {
             id: textRec
             radius: rectRadius
-            width: root.width - label.width - 15
+            width: (root.width - label.width - 15)
             color: root.color
             anchors.top: parent.top
             anchors.topMargin: textMargin

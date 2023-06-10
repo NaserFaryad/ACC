@@ -10,6 +10,7 @@ Item {
     property color txtColor: "#000000"
     property int txtSize: 14
     property bool txtBold: true
+    property bool visibleNumber: true
 
     Rectangle {
         id: rectangle
@@ -22,7 +23,7 @@ Item {
 
             Button {
                 id: button
-                width: parent.width*0.4
+                width: parent.width*0.4 + (parent.width*0.6)*(1-visibleNumber)
                 height: parent.height
                 text: button_name
                 font.bold: txtBold
@@ -42,7 +43,8 @@ Item {
                 text: display
                 font.bold: txtBold
                 font.pixelSize: root.txtSize
-                width: parent.width*0.6
+                width: (parent.width*0.6)*visibleNumber
+                visible: visibleNumber
                 height: parent.height
                 color: root.txtColor
                 anchors.verticalCenter: parent.verticalCenter
