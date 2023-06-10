@@ -16,11 +16,13 @@ PiGPIO::PiGPIO(QObject *parent) : QThread(parent)
     m_display = "Starting";
     qInfo() << m_display;
     emit notice(QVariant(m_display));
-    int ret = PiGPIO::Square_Init();
+    int ret;
+    ret = PiGPIO::Square_Init();
     if (ret < 0) {
         qInfo() << "Signal Generator Square wave Inint failed!!.";
     }
     wave_mode = SQUARE;
+    qInfo() << "###### after sig gen init.";
     ret = PiGPIO::AD7706_Init();
     if (ret < 0) {
         qInfo() << "Current sensor Inint failed!!.";
@@ -166,6 +168,7 @@ void PiGPIO::timeout()
     m_display = QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss");
     const QMutexLocker locker(&m_mutex);
     read_flag = true;
+//    qInfo() << "READ FLAG " << read_flag;
 //    current = PiGPIO::read_current();
 //    temp = PiGPIO::read_temperature();
     qInfo() << this << "******PiGPIO: " << QThread::currentThreadId();
@@ -310,7 +313,7 @@ void PiGPIO::run()
 //                return;
 //            }
 //    }
-    forever
+    while(true)
     {
         if ( QThread::currentThread()->isInterruptionRequested() ) {
                                 return;
@@ -375,16 +378,16 @@ void PiGPIO::run()
             QVariantList current_temp;
             QVariantList current;
             qInfo() << "Main Loop.";
-            current = PiGPIO::read_current();
             temp = PiGPIO::read_temperature();
-
+            qInfo() << "temp: " << temp;
+            current = PiGPIO::read_current();
             current_temp.append(current[0]);
             current_temp.append(current[1]);
             qInfo() << "Current: " << current[1];
-            qInfo() << "temp: " << temp;
+
             current_temp.append(temp);
             emit print_current(current_temp);
-            const QMutexLocker locker(&m_mutex);
+//            const QMutexLocker locker(&m_mutex);
             read_flag = false;
         }
 

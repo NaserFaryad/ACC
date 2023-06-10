@@ -106,9 +106,9 @@ ApplicationWindow {
 
         }
         onPrint_current_temp: {
-            sensCurrentP.indicText = (Math.round(current_temp[0]*10000)/10000).toFixed(4);
-            sensCurrentN.indicText = (Math.round(current_temp[1]*10000)/10000).toFixed(4);
-             sensTemp.indicText = (Math.round(current_temp[2]*10000)/10000).toFixed(4);
+            sensCurrentP.indicText = (Math.round(current_temp[0]*10000)/10).toFixed(1);
+            sensCurrentN.indicText = (Math.round(current_temp[1]*10000)/10).toFixed(1);
+             sensTemp.indicText = (Math.round(current_temp[2]*10000)/10000).toFixed(1);
         }
         onOvershoot_ready: {
             applicationWindow.over_shoot = (Math.round(over_shoot*1000000)/1000000).toFixed(6)
