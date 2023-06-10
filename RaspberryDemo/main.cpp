@@ -3,7 +3,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QDebug>
-
+#include <QMetaObject>
 #include "pigpio.h"
 #include "worker.h"
 #include "bridge.h"
@@ -23,15 +23,19 @@ int main(int argc, char *argv[])
     QThread adcThread;
     Worker adc;
 
-    QThread singenThread;
+//    QThread singenThread;
     PiGPIO singen;
+//    auto singen = new PiGPIO;
 
     Bridge bridge;
     adc.moveToThread(&adcThread);
+//    singen.moveToThread(&singenThread);
 
-    singenThread.setObjectName("Signal Generator Thread");
-    singen.setObjectName("SINGEN");
-
+//    singenThread.setObjectName("Signal Generator Thread");
+//    singen.setObjectName("SINGEN");
+//    QObject::connect(&singenThread,&QThread::started,&singen,&PiGPIO::exec, Qt::QueuedConnection);
+//    QMetaObject::invokeMethod(&singen, "exec", Qt::QueuedConnection);
+    QObject::connect(&bridge,&Bridge::dummy_signal,&singen,&PiGPIO::dummy, Qt::QueuedConnection);
     adcThread.setObjectName("Main ADC Thread");
     adc.setObjectName("ADC");
 
@@ -58,7 +62,7 @@ int main(int argc, char *argv[])
     QObject::connect(&adc,&Worker::cutoff_ready, &bridge,&Bridge::cutoff_slot, Qt::QueuedConnection);
     QObject::connect(&adc,&Worker::naturalfreq_ready, &bridge,&Bridge::naturalfreq, Qt::QueuedConnection);
     QObject::connect(&adc,&Worker::timer_stop,&singen,&PiGPIO::stop, Qt::QueuedConnection);
-    QObject::connect(&adc,&Worker::timer_start,&singen,&PiGPIO::start, Qt::QueuedConnection);
+    QObject::connect(&adc,&Worker::timer_start,&singen,&PiGPIO::timer_start, Qt::QueuedConnection);
 
     // Temperature and Current sensor connection
     QObject::connect(&singen,&PiGPIO::print_current,&bridge,&Bridge::sensor_current_temp, Qt::QueuedConnection);
@@ -72,8 +76,7 @@ int main(int argc, char *argv[])
     // Progress bar connection
     QObject::connect(&adc,&Worker::set_progress_bar,&bridge,&Bridge::progress_bar_value, Qt::QueuedConnection);
 
-    adcThread.start();
-    singenThread.start();
+
 
     // the Qml engine
     QQmlApplicationEngine engine;
@@ -94,5 +97,7 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
     engine.load(url);
 
+    adcThread.start();
+    singen.start();
     return app.exec();
 }

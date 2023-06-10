@@ -1,13 +1,15 @@
 #include "pigpio.h"
+#include <QThread>
 
 int value = 0;
-PiGPIO::PiGPIO(QObject *parent) : QObject(parent)
+PiGPIO::PiGPIO(QObject *parent) : QThread(parent)
 {
 
     PiGPIO::gpio_export( "3", "out");
     loop_lock = false;
     read_flag = false;
     connect(&m_timer, &QTimer::timeout, this, &PiGPIO::timeout);
+//    PiGPIO::start();
 //    connect(&m_timer, &QTimer::timeout, this, &PiGPIO::main_loop);
     m_timer.setInterval(1000);
      m_timer.start();
@@ -24,6 +26,11 @@ PiGPIO::PiGPIO(QObject *parent) : QObject(parent)
         qInfo() << "Current sensor Inint failed!!.";
     }
     PiGPIO::max31865_Init();
+    sin_gen_flag = false;
+    sqr_gen_flag = false;
+
+
+//    PiGPIO::exec();
 
 }
 
@@ -153,50 +160,36 @@ int PiGPIO::max31865_Init()
 
 void PiGPIO::timeout()
 {
-    float temp;
-    QVariantList current_temp;
-    QVariantList current;
+//    float temp;
+//    QVariantList current_temp;
+//    QVariantList current;
     m_display = QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss");
+    const QMutexLocker locker(&m_mutex);
     read_flag = true;
-    current = PiGPIO::read_current();
-    temp = PiGPIO::read_temperature();
-
-    current_temp.append(current[0]);
-    current_temp.append(current[1]);
-//    qInfo() << "Current: " << current[1];
-//    qInfo() << "temp: " << temp;
-    current_temp.append(temp);
-    emit print_current(current_temp);
-    read_flag = false;
+//    current = PiGPIO::read_current();
+//    temp = PiGPIO::read_temperature();
+    qInfo() << this << "******PiGPIO: " << QThread::currentThreadId();
+//    current_temp.append(current[0]);
+//    current_temp.append(current[1]);
+////    qInfo() << "Current: " << current[1];
+////    qInfo() << "temp: " << temp;
+//    current_temp.append(temp);
+//    emit print_current(current_temp);
+//    read_flag = false;
     emit notice(QVariant(m_display));
 
 
 }
 
-void PiGPIO::start()
+void PiGPIO::timer_start()
 {
-    int ret = PiGPIO::AD7706_Init();
-    if (ret < 0) {
-        qInfo() << "Current sensor Inint failed!!.";
-    }
-    PiGPIO::max31865_Init();
-//    m_display = "Starting...";
-//    qInfo() << m_display;
-//    m_timer = new QTimer(this);
-//    connect(m_timer, &QTimer::timeout, this, &PiGPIO::timeout );
-//    m_timer->setInterval(1000);
-//    m_timer->start();
-//    emit notice(QVariant(m_display));
     m_timer.start();
 }
 
 void PiGPIO::stop()
 {
     m_timer.stop();
-//    PiGPIO::main_loop();
-//    m_display = "Stopped";
-//    qInfo() << m_display;
-//    emit notice(QVariant(m_display));
+
 }
 
 void PiGPIO::gpio_high(QString pinNum)
@@ -221,47 +214,16 @@ void PiGPIO::gpio_low(QString pinNum)
 
 void PiGPIO::Sinusoid_Gen(int freq)
 {
-//    PiGPIO::stop();
-//    qInfo() << "PiGPIO: Sinusoid_Gen function.";
-    while(read_flag)
-    {
-        qInfo() << "/////Sinusoid_Gen loop";
-    }
-    if (wave_mode != SIN)
-    {
-        PiGPIO::Sinusoid_Init();
-        wave_mode = SIN;
-        qInfo() << "Initializing Sinusoid Wave...";
-    }
-    ad9833_set_freq(ad9833_dev, 0, freq);
-    ad9833_set_phase(ad9833_dev, 0, 0);
-    ad9833_select_freq_reg(ad9833_dev, 0);
-    ad9833_select_phase_reg(ad9833_dev, 0);
-//    PiGPIO::start();
+    const QMutexLocker locker(&m_mutex);
+    sin_gen_flag = true;
+    sin_freq = freq;
 }
 
 void PiGPIO::Square_Gen(int freq)
 {
-    while(read_flag)
-    {
-        qInfo() << "/////Square_Gen loop";
-    }
-//    PiGPIO::stop();
-//    qInfo() << "PiGPIO: Square_Gen function.";
-    if (wave_mode != SQUARE)
-    {
-        qInfo() << "Initializing Square Wave...";
-        PiGPIO::Square_Init();
-        wave_mode = SQUARE;
-
-    }
-//    qInfo() << "Square Wave setting frequency";
-    ad9833_set_freq(ad9833_dev, 0, freq);
-//    qInfo() << "Square Wave setting phase";
-    ad9833_set_phase(ad9833_dev, 0, 0.0);
-    ad9833_select_freq_reg(ad9833_dev, 0);
-    ad9833_select_phase_reg(ad9833_dev, 0);
-//    PiGPIO::start();
+    const QMutexLocker locker(&m_mutex);
+    sqr_gen_flag = true;
+    sqr_freq = freq;
 }
 
 QVariantList PiGPIO::read_current()
@@ -336,29 +298,100 @@ float PiGPIO::read_temperature()
    return temp;
 }
 
-void PiGPIO::main_loop()
+void PiGPIO::run()
 {
-    float temp;
-    QVariantList current_temp;
-    QVariantList current;
-    while(true)
-    {
-        for(int i; i < 1e9; i++);
+    qInfo() << "Inside EXEC Loop ////////////////////////////////";
 
-        if(read_flag)
+
+
+//    forever {
+//            if ( QThread::currentThread()->isInterruptionRequested() ) {
+//                qInfo() << ">>>>>>>>>>>>>>Interrrupt Loop.";
+//                return;
+//            }
+//    }
+    forever
+    {
+        if ( QThread::currentThread()->isInterruptionRequested() ) {
+                                return;
+                    }
+
+        if(sin_gen_flag)
         {
+
+            const QMutexLocker locker(&m_mutex);
+            if (wave_mode != SIN)
+            {
+                PiGPIO::Sinusoid_Init();
+                wave_mode = SIN;
+                qInfo() << "Initializing Sinusoid Wave...";
+            }
+            else {
+                int ret = Aux_Spi_Init(&ad9833_dev->spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
+//                if (ret < 0) {
+//                    return -1;
+                }
+            qInfo() << "#########Sin Generator, Frequency= " << sin_freq;
+            ad9833_set_freq(ad9833_dev, 0, sin_freq);
+            ad9833_set_phase(ad9833_dev, 0, 0);
+            ad9833_select_freq_reg(ad9833_dev, 0);
+            ad9833_select_phase_reg(ad9833_dev, 0);
+            sin_gen_flag = false;
+            int ret = Aux_Spi_Init(&max31865_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS2);
+            ret = Aux_Spi_Init(&ad770x_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS_NONE);
+//            if (ret<0) return ret;
+        }
+        else if(sqr_gen_flag)
+        {
+            const QMutexLocker locker(&m_mutex);
+            if (wave_mode != SQUARE)
+            {
+                qInfo() << "Initializing Square Wave...";
+                PiGPIO::Square_Init();
+                wave_mode = SQUARE;
+
+            }
+            else {
+                int ret = Aux_Spi_Init(&ad9833_dev->spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
+//                if (ret < 0) {
+//                    return -1;
+//                }
+            }
+            qInfo() << "#########Sqr Generator, Frequency= " << sqr_freq;
+            ad9833_set_freq(ad9833_dev, 0, sqr_freq);
+        //    qInfo() << "Square Wave setting phase";
+            ad9833_set_phase(ad9833_dev, 0, 0.0);
+            ad9833_select_freq_reg(ad9833_dev, 0);
+            ad9833_select_phase_reg(ad9833_dev, 0);
+            sqr_gen_flag = false;
+            int ret = Aux_Spi_Init(&max31865_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS2);
+            ret = Aux_Spi_Init(&ad770x_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS_NONE);
+//            if (ret<0) return ret;
+
+        }
+        else if(read_flag)
+        {
+            float temp;
+            QVariantList current_temp;
+            QVariantList current;
             qInfo() << "Main Loop.";
             current = PiGPIO::read_current();
             temp = PiGPIO::read_temperature();
 
             current_temp.append(current[0]);
             current_temp.append(current[1]);
-        //    qInfo() << "Current: " << current[1];
-        //    qInfo() << "temp: " << temp;
+            qInfo() << "Current: " << current[1];
+            qInfo() << "temp: " << temp;
             current_temp.append(temp);
             emit print_current(current_temp);
+            const QMutexLocker locker(&m_mutex);
             read_flag = false;
         }
 
-    }
+        }
+}
+
+void PiGPIO::dummy()
+{
+    qInfo() << "OOOOOOOOOOOOOOOOOOOOO Inside dummy";
 }

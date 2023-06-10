@@ -55,6 +55,7 @@ signals:
     void cutoff_ready(double cutof);
     void naturalfreq_ready(double natural_freq);
     void set_progress_bar(int percent);
+    void dummy_signal();
 
 public slots:
     void pressed_button(int value);
@@ -76,6 +77,7 @@ public slots:
     void naturalfreq(double natural_freq);
     void progress_bar_value(int percent);
     void print_error(QString msg);
+    void dummy();
 private:
     int button_name;
     file_manager files;

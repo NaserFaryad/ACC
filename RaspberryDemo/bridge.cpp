@@ -153,3 +153,8 @@ void Bridge::print_error(QString msg)
 {
     emit error_occured(msg);
 }
+
+void Bridge::dummy()
+{
+    emit dummy_signal();
+}

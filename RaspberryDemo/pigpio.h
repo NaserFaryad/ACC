@@ -6,6 +6,8 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QVariant>
+#include <QThread>
+#include <QMutex>
 
 #include "spidev_lib.h"
 #include "ad9833.h"
@@ -25,7 +27,7 @@
 #define SQUARE 0
 #define SIN    1
 
-class PiGPIO : public QObject
+class PiGPIO : public QThread
 {
     Q_OBJECT
 public:
@@ -45,7 +47,7 @@ signals:
 private slots:
 
 public slots:
-    void start();
+    void timer_start();
     void stop();
     void gpio_high(QString pinNum);
     void gpio_low(QString pinNum);
@@ -53,12 +55,21 @@ public slots:
     void Square_Gen(int freq);
     QVariantList read_current();
     float read_temperature();
-    void main_loop();
+
+    void dummy();
 
 private:
+    void run();
+
+//    std::unique_ptr<QThread> m_thread;
     int wave_mode;
     bool loop_lock;
+    mutable QMutex m_mutex;
     bool read_flag;
+    bool sin_gen_flag;
+    bool sqr_gen_flag;
+    int sin_freq;
+    int sqr_freq;
     QTimer m_timer;
     QString m_display;
     struct ad9833_dev *ad9833_dev;

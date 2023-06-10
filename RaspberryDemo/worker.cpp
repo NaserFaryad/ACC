@@ -1,12 +1,11 @@
 #include "worker.h"
 #include "ad717x.h"
-
+#include <QThread>
 
 Worker::Worker(QObject *parent) : QObject(parent)
 {
     m_producer = false;
     m_count = 0;
-
 
 }
 
@@ -545,6 +544,7 @@ void Worker::over_shoot_calc()
 
 void Worker::static_real_time()
 {
+    qInfo() << this << "******Worker: " << QThread::currentThreadId();
 
     if(m_producer == false) {
 
