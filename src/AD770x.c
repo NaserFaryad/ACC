@@ -98,7 +98,7 @@ unsigned int readADResultUnsignedInt(spi_device *spi_dev) {
     return r;
 }
 
-double readADResultDouble(spi_device *spi_dev, uint8_t channel, float refOffset, double VRef) {
+double readADResultDouble(spi_device *spi_dev, uint8_t channel, float refOffset, double VRef, uint8_t polarity, int Gain) {
     double result = 0.0f;
     unsigned int ad_result_uint = 0;
     // float refOffset = 0.0;
@@ -111,7 +111,19 @@ double readADResultDouble(spi_device *spi_dev, uint8_t channel, float refOffset,
     ad_result_uint = readADResultUnsignedInt(spi_dev);
     bcm2835_gpio_write(AD7706_CS, HIGH);
 
-    result = (double) ((double)ad_result_uint-32768) * 1.0 / 32768.0 * VRef - refOffset;
+    // printf("Channel: %d - Raw Value=%d\n", channel, ad_result_uint);
+    // int GAIN = 1;
+    
+    if (polarity == UNIPOLAR) {  // Unipolar
+        result = (double) (VRef / (double)(65536 - 1)) * ((double)ad_result_uint / (double)Gain);
+    } else if (polarity == BIPOLAR) {  // bipolar
+        result = (double) (VRef / (double)(32768 - 1)) * ((double)ad_result_uint / Gain);
+    } else {
+        result = 0.00f;
+    }
+
+    // result = (double) ((double)ad_result_uint-32768) * 1.0 / 32768.0 * VRef - refOffset;
+    // result = (double) (VRef / (65535)) * ((double)ad_result_uint / GAIN);  //65535
 
     return result;
 }

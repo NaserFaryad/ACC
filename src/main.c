@@ -515,19 +515,19 @@ int AD7706_Init() {
         sum_ch2 = 0;
         double start_time = clock();
         for(i = 0; i< 12; i++){
-            sum_ch1 = sum_ch1 + readADResultDouble(spi_dev, CHN_AIN1, 0, 1.225);
+            sum_ch1 += readADResultDouble(spi_dev, CHN_AIN1, 0, 1.225, UNIPOLAR, 1);
         }
         for(i = 0; i< 12; i++){
-            sum_ch2 = sum_ch2 + readADResultDouble(spi_dev, CHN_AIN2, 0, 1.225);
+            sum_ch2 += readADResultDouble(spi_dev, CHN_AIN2, 0, 1.225, UNIPOLAR, 1);
         }
         double stop_time = clock();
         avg_ch1 = sum_ch1 / i;
         avg_ch2 = sum_ch2 / i;
         current_P15 = (avg_ch1 + 0) / 5.6;
         current_N15 = (avg_ch2 + 0) / 5.6;
-        printf("channel 1 = %f  ", current_P15);
-        printf("channel 2 = %f  ", current_N15);
-        printf("time = %f\n",(stop_time - start_time)/CLOCKS_PER_SEC);
+        printf("channel 1 = %f  \n", current_P15);
+        printf("channel 2 = %f  \n", current_N15);
+        // printf("time = %f\n",(stop_time - start_time)/CLOCKS_PER_SEC);
         // bcm2835_delay(100);
     }
     

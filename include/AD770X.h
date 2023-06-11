@@ -82,7 +82,7 @@ uint8_t spiTransfer(spi_device *spi_dev, volatile uint8_t data);
 void setNextOperation(spi_device *spi_dev, uint8_t reg, uint8_t channel, uint8_t readWrite);
 void writeClockRegister(spi_device *spi_dev, uint8_t CLKDIS, uint8_t CLKDIV, uint8_t outputUpdateRate);
 void writeSetupRegister(spi_device *spi_dev, uint8_t operationMode, uint8_t gain, uint8_t unipolar, uint8_t buffered, uint8_t fsync);
-double readADResultDouble(spi_device *spi_dev, uint8_t channel, float refOffset, double VRef);
+double readADResultDouble(spi_device *spi_dev, uint8_t channel, float refOffset, double VRef, uint8_t polarity, int Gain);
 void ad7706Reset(spi_device *spi_dev);
 bool dataReady(spi_device *spi_dev, uint8_t channel);
 void ad7706InitDefaultParams(spi_device *spi_dev, uint8_t channel);
