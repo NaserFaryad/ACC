@@ -101,13 +101,15 @@ unsigned int readADResultUnsignedInt(spi_device *spi_dev) {
 }
 
 int readADResultDouble(spi_device *spi_dev, double *result,uint8_t channel, float refOffset, double VRef, uint8_t polarity, int Gain) {
-//    double result = 0.0f;
+    double result_local = 0.0f;
     unsigned int ad_result_uint = 0;
     // float refOffset = 0.0;
     int ret = 0;
-    ret = dataReady(spi_dev, channel, 100000);
+    ret = dataReady(spi_dev, channel, 1000000);
     if (ret < 0)
+    {
         return ret;
+    }
     bcm2835_gpio_write(AD7706_CS, LOW);
     setNextOperation(spi_dev, REG_DATA, channel, 1);
     ad_result_uint = readADResultUnsignedInt(spi_dev);
@@ -117,16 +119,15 @@ int readADResultDouble(spi_device *spi_dev, double *result,uint8_t channel, floa
     // int GAIN = 1;
 
     if (polarity == UNIPOLAR) {  // Unipolar
-        *result = (double) (VRef / (double)(65536 - 1)) * ((double)ad_result_uint / (double)Gain);
+        result_local = (double) (VRef / (double)(65536 - 1)) * ((double)ad_result_uint / (double)Gain);
     } else if (polarity == BIPOLAR) {  // bipolar
-        *result = (double) (VRef / (double)(32768 - 1)) * ((double)ad_result_uint / Gain);
+        result_local = (double) (VRef / (double)(32768 - 1)) * ((double)ad_result_uint / Gain);
     } else {
         return -2;
     }
-
     // result = (double) ((double)ad_result_uint-32768) * 1.0 / 32768.0 * VRef - refOffset;
     // result = (double) (VRef / (65535)) * ((double)ad_result_uint / GAIN);  //65535
-
+    *result = result_local;
     return ret;
 }
 

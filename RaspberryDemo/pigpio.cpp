@@ -194,27 +194,28 @@ QVariantList PiGPIO::read_current()
     double avg_ch2 = 0;
     double current_P15 = 0;
     double current_N15 = 0;
-    double result = 0.0f;
+    double result1 = 0.0f;
+    double result2 = 0.0f;
     int i = 0;
     sum_ch1 = 0;
     sum_ch2 = 0;
     for(i = 0; i< 12; i++){
-        ret = readADResultDouble(ad770x_spi_dev, &result,CHN_AIN1, 0, 1.225, UNIPOLAR, 1);
+        ret = readADResultDouble(ad770x_spi_dev, &result1,CHN_AIN1, 0, 1.225, UNIPOLAR, 1);
         if(ret < 0)
         {
             emit error_occured("PiGPIO Thread: read_current func, error code="+QString::number(AD7706_READ_TIMEOUT_ERROR));
             i = 12;
         }
-        sum_ch1 += result;
+        sum_ch1 += result1;
     }
     for(i = 0; i< 12; i++){
-        ret = readADResultDouble(ad770x_spi_dev, &result,CHN_AIN2, 0, 1.225, UNIPOLAR, 1);
+        ret = readADResultDouble(ad770x_spi_dev, &result2,CHN_AIN2, 0, 1.225, UNIPOLAR, 1);
         if(ret < 0)
         {
             emit error_occured("PiGPIO Thread: read_current func, error code="+QString::number(AD7706_READ_TIMEOUT_ERROR));
             i = 12;
         }
-        sum_ch1 += result;
+        sum_ch2 += result2;
     }
     avg_ch1 = sum_ch1 / i;
     avg_ch2 = sum_ch2 / i;
