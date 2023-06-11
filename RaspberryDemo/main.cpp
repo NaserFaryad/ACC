@@ -35,7 +35,6 @@ int main(int argc, char *argv[])
 //    singen.setObjectName("SINGEN");
 //    QObject::connect(&singenThread,&QThread::started,&singen,&PiGPIO::exec, Qt::QueuedConnection);
 //    QMetaObject::invokeMethod(&singen, "exec", Qt::QueuedConnection);
-    QObject::connect(&bridge,&Bridge::dummy_signal,&singen,&PiGPIO::dummy, Qt::QueuedConnection);
     adcThread.setObjectName("Main ADC Thread");
     adc.setObjectName("ADC");
 
@@ -76,7 +75,8 @@ int main(int argc, char *argv[])
     // Progress bar connection
     QObject::connect(&adc,&Worker::set_progress_bar,&bridge,&Bridge::progress_bar_value, Qt::QueuedConnection);
 
-
+    // Internal Calibration connection
+    QObject::connect(&bridge,&Bridge::start_internal_calibration,&adc,&Worker::internal_calibration, Qt::QueuedConnection);
 
     // the Qml engine
     QQmlApplicationEngine engine;

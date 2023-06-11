@@ -93,6 +93,7 @@ bool AD7175_VerifyChipID(ad717x_dev **dev);
 void WriteRegister(ad717x_dev *dev, uint8_t addr, int32_t val);
 int Initialize_Device(ad717x_dev **device, ad717x_init_param init_param, int max_retry);
 int Static_Init(ad717x_dev **device);
+int zero_internal_calibration(int *offset);
 int Static_Read(ad717x_dev *dev, int32_t *adc_data);
 int Dynamic_Init(ad717x_dev **device);
 int Dynamic_Read(ad717x_dev *dev, int32_t *adc_data);

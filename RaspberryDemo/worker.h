@@ -85,6 +85,7 @@ public slots:
     void natural_freq_calc();
     void cuttoff_freq_calc();
     void over_shoot_calc();
+    void internal_calibration();
 
 
 
@@ -93,6 +94,7 @@ public slots:
 private:
     QTimer *m_timer;
     QElapsedTimer e_timer;
+    int adc_offset;
     bool m_producer;
     int m_count;
     int adc_mode = -1;

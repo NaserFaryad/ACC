@@ -153,7 +153,7 @@ int Aux_Spi_Init(spi_device **device, uint32_t spi_speed, uint8_t spi_mode, uint
             break;
 
         default:
-            return -15;
+            return -1;
     }
 
     spidev_init(sdev);

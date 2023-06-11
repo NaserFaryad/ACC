@@ -7,7 +7,7 @@ import QtQuick.Dialogs 1.1
 
 ApplicationWindow {
     id: applicationWindow
-    flags: Qt.FramelessWindowHint
+//    flags: Qt.FramelessWindowHint
     width: 1280
     height: 800
     visible: true
@@ -637,7 +637,6 @@ ApplicationWindow {
                         y: 430
                         text: qsTr("Reset")
                         onClicked: {
-                            bridge.dummy()
                             gp_flag = false
                             gn_flag = false
                             zp_flag = false
@@ -774,6 +773,7 @@ ApplicationWindow {
                         files.write_Params(gain, offset)
                         bridge.update_gain_offset()
                     }
+                    onCalibclicked: bridge.internal_calibration()
 
                 }
             }
@@ -925,7 +925,6 @@ ApplicationWindow {
 /*##^##
 Designer {
     D{i:1;anchors_y:0}D{i:2;anchors_x:44}D{i:10;invisible:true}D{i:11;invisible:true}
-D{i:19;anchors_height:400;anchors_width:400;anchors_x:15;anchors_y:8}D{i:35;invisible:true}
-D{i:36;invisible:true}
+D{i:19;anchors_height:400;anchors_width:400;anchors_x:15;anchors_y:8}D{i:36;invisible:true}
 }
 ##^##*/

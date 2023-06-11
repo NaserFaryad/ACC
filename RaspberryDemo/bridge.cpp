@@ -154,7 +154,9 @@ void Bridge::print_error(QString msg)
     emit error_occured(msg);
 }
 
-void Bridge::dummy()
+void Bridge::internal_calibration()
 {
-    emit dummy_signal();
+    emit start_internal_calibration();
 }
+
+

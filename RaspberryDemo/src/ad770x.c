@@ -100,44 +100,54 @@ unsigned int readADResultUnsignedInt(spi_device *spi_dev) {
     return r;
 }
 
-double readADResultDouble(spi_device *spi_dev, uint8_t channel, float refOffset, double VRef) {
-    double result = 0.0f;
+int readADResultDouble(spi_device *spi_dev, double *result,uint8_t channel, float refOffset, double VRef, uint8_t polarity, int Gain) {
+//    double result = 0.0f;
     unsigned int ad_result_uint = 0;
     // float refOffset = 0.0;
-
-    while (!dataReady(spi_dev, channel)) {
-    };
-
-//    GPIOWrite(AD7706_CS, LOW);
+    int ret = 0;
+    ret = dataReady(spi_dev, channel, 100000);
+    if (ret < 0)
+        return ret;
     bcm2835_gpio_write(AD7706_CS, LOW);
     setNextOperation(spi_dev, REG_DATA, channel, 1);
     ad_result_uint = readADResultUnsignedInt(spi_dev);
-//    GPIOWrite(AD7706_CS, HIGH);
     bcm2835_gpio_write(AD7706_CS, HIGH);
 
-    result = (double) ((double)ad_result_uint-32768) * 1.0 / 32768.0 * VRef - refOffset;
+    // printf("Channel: %d - Raw Value=%d\n", channel, ad_result_uint);
+    // int GAIN = 1;
 
-    return result;
+    if (polarity == UNIPOLAR) {  // Unipolar
+        *result = (double) (VRef / (double)(65536 - 1)) * ((double)ad_result_uint / (double)Gain);
+    } else if (polarity == BIPOLAR) {  // bipolar
+        *result = (double) (VRef / (double)(32768 - 1)) * ((double)ad_result_uint / Gain);
+    } else {
+        return -2;
+    }
+
+    // result = (double) ((double)ad_result_uint-32768) * 1.0 / 32768.0 * VRef - refOffset;
+    // result = (double) (VRef / (65535)) * ((double)ad_result_uint / GAIN);  //65535
+
+    return ret;
 }
 
-bool dataReady(spi_device *spi_dev, uint8_t channel) {
+int32_t dataReady(spi_device *spi_dev, uint8_t channel, int32_t timeout) {
     uint8_t b1 = 0x0;
 
     uint8_t ready = 0;
-    uint32_t timeout = 500;
+//    uint32_t timeout = 500;
     int TIMEOUT = -3;
 
     uint8_t pin_value;
 
-    // while(!ready && --timeout) {
-        // 	ready = bcm2835_gpio_lev(RPI_V2_GPIO_P1_13);
-        // }
+     while(!ready && --timeout) {
+            ready = bcm2835_gpio_lev(RPI_V2_GPIO_P1_13);
+         }
 
-        // return timeout ? 0 : TIMEOUT;
-    ready = bcm2835_gpio_lev(RPI_V2_GPIO_P1_13);
+     return timeout ? 0 : TIMEOUT;
+//    ready = bcm2835_gpio_lev(RPI_V2_GPIO_P1_13);
 //    ready = GPIORead(RPI_V2_GPIO_P1_13);
 
-    return ! ready;
+//    return ! ready;
 
     // bcm2835_gpio_write(AD7706_CS, LOW);
     // setNextOperation(spi_dev, REG_CMM, channel, 1);
@@ -177,9 +187,13 @@ void ad7706Init(spi_device *spi_dev, uint8_t channel, uint8_t clkDivider, uint8_
 //    GPIOWrite(AD7706_CS, HIGH);
     bcm2835_gpio_write(AD7706_CS, HIGH);
 
-
-    while (!dataReady(spi_dev, channel)) {
-    };
+    int ret = dataReady(spi_dev, channel, 100000);
+    if (ret < 0)
+    {
+        fprintf(stderr, "!!!!!!!!!! Time out Error!!!!!!!!!!!!!!");
+    }
+    /*while (!dataReady(spi_dev, channel)) {
+    };*/
 }
 
 void ad7706InitDefaultParams(spi_device *spi_dev, uint8_t channel) {

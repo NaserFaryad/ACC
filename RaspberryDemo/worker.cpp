@@ -6,6 +6,7 @@ Worker::Worker(QObject *parent) : QObject(parent)
 {
     m_producer = false;
     m_count = 0;
+    adc_offset = 8388608;
 
 }
 
@@ -310,6 +311,7 @@ void Worker::read_static_voltage(QVariant button_name)
     }
 //    double real_voltage = (adc_data/2) * (2.5/(0.75*8388608)) / 1.333333; // unipolar conversion
     double real_voltage = (double) ((((double) adc_data) - 8388608)*2.5) /(8388608) ;
+//    double real_voltage = double (((double)adc_data-8388608) * (4194304/5592352) + (adc_offset - 8388608))*2.5/6291456;
     qInfo() << "Real Voltage after conversion: " << real_voltage;
     switch (button_name.toInt()) {
     case GP:
@@ -537,7 +539,19 @@ void Worker::over_shoot_calc()
          qInfo() << "OverShoot check failed!";
 //         return false;
      }
-//     emit timer_stop();
+     //     emit timer_stop();
+}
+
+void Worker::internal_calibration()
+{
+    int ret = zero_internal_calibration(&adc_offset);
+    if (ret < 0)
+    {
+        emit error_occured("Worker Thread: internal_calibration, zero_internal_calibration, error code="+QString::number(ret));
+        qInfo() << "internal_calibration: zero_internal_calibration failed. error code: " << ret;
+    }
+    qInfo() << "Offset = " << adc_offset;
+
 }
 
 
@@ -560,6 +574,7 @@ void Worker::static_real_time()
     }
     qInfo() << "ADC RAW DATA= " <<  adc_data;
 //    double real_voltage = (adc_data/2) * (2.5/(0.75*8388608)) / 1.333333;
+//    double real_voltage = (double) (((double) adc_data-8388608) * (0.75) + ((double) adc_offset - 8388608))*2.5/6291456;
     double real_voltage = (double) ((((double) adc_data) - 8388608)*2.5) /(8388608) ;
     qInfo() << "Real-Time Voltage after conversion: " << real_voltage;
     qInfo() << "Voltage: " << real_voltage;

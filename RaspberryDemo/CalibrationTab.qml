@@ -7,6 +7,7 @@ Item {
     height: 550
     signal p1clicked()
     signal p2clicked()
+    signal calibclicked()
     signal calculate()
     signal save()
     property string volt_meter1: "0.00"
@@ -86,7 +87,7 @@ Item {
                 NumIndic {
                     id: numIndic
                     y: parent.height * 3 / 6
-                    width: 150
+                    width: 250
                     anchors.horizontalCenter: parent.horizontalCenter
                     labelText: "Captured Data"
                     indicText: captured_data1
@@ -95,7 +96,7 @@ Item {
                 TextField {
                     id: voltage1
                     y: parent.height * 5 / 6
-                    width: 150
+                    width: 250
                     anchors.horizontalCenter: parent.horizontalCenter
                     font.pixelSize: 24
                     text: kybrdPopup.kybrdValue
@@ -133,7 +134,7 @@ Item {
 
                 NumIndic {
                     id: numIndic2
-                    width: 150
+                    width: 250
                     y: parent.height * 3 / 6
                     anchors.horizontalCenter: parent.horizontalCenter
                     labelText: "Captured Data"
@@ -142,7 +143,7 @@ Item {
 
                 TextField {
                     id: voltage2
-                    width: 150
+                    width: 250
                     y: parent.height * 5 / 6
                     anchors.horizontalCenter: parent.horizontalCenter
                     font.pixelSize: 24
@@ -263,7 +264,7 @@ Item {
                     id: column3
                     anchors.topMargin: 20
                     anchors.fill: parent
-                    spacing: 40
+                    spacing: 10
                     Button {
                         id: button2
                         height: 50
@@ -287,10 +288,25 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter
                         font.pixelSize: 18
                         background: Rectangle {
-                                        color: parent.down ? "#bbbbbb" :
-                                                (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            color: parent.down ? "#bbbbbb" :
+                                                 (parent.hovered ? "#d6d6d6" : "#f6f6f6")
                         }
                         onClicked: save()
+                    }
+
+                    Button {
+                        id: button4
+                        width: 150
+                        height: 50
+                        text: qsTr("Internal Calibration")
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        checkable: false
+                        font.pixelSize: 12
+                        background: Rectangle {
+                            color: parent.down ? "#bbbbbb" :
+                                                                    (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                        }
+                        onClicked: calibclicked()
                     }
                 }
             }
@@ -304,8 +320,8 @@ Item {
 
 /*##^##
 Designer {
-    D{i:4;anchors_y:0}D{i:21;anchors_x:50}D{i:24;anchors_x:200}D{i:17;anchors_height:400;anchors_width:200}
-D{i:27;anchors_y:0}D{i:26;anchors_height:70;anchors_width:175;anchors_x:0;anchors_y:0}
-D{i:15;anchors_height:192.5;anchors_width:1000;anchors_y:0}D{i:1;anchors_height:400;anchors_width:400}
+    D{i:15;anchors_height:192.5;anchors_width:1000;anchors_y:0}D{i:4;anchors_y:0}D{i:21;anchors_x:50}
+D{i:24;anchors_x:200}D{i:26;anchors_height:70;anchors_width:175;anchors_x:0;anchors_y:0}
+D{i:27;anchors_y:0}D{i:17;anchors_height:400;anchors_width:200}D{i:1;anchors_height:400;anchors_width:400}
 }
 ##^##*/

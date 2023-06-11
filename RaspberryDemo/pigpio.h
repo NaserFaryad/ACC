@@ -27,6 +27,12 @@
 #define SQUARE 0
 #define SIN    1
 
+/*Error Codes*/
+#define AUX_SPI_INIT_ERROR          -1
+#define MAX31865_INIT_ERROR         -2
+#define AD7706_READ_TIMEOUT_ERROR   -3
+#define AD9833_INIT_ERROR           -4
+
 class PiGPIO : public QThread
 {
     Q_OBJECT
@@ -43,6 +49,7 @@ signals:
     void notice(QVariant data);
     void print_current(QVariantList current);
     void temperature_fault_notice(QString message);
+    void error_occured(QString msg);
 
 private slots:
 
@@ -56,14 +63,9 @@ public slots:
     QVariantList read_current();
     float read_temperature();
 
-    void dummy();
-
 private:
     void run();
-
-//    std::unique_ptr<QThread> m_thread;
     int wave_mode;
-    bool loop_lock;
     mutable QMutex m_mutex;
     bool read_flag;
     bool sin_gen_flag;

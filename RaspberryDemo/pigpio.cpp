@@ -5,35 +5,18 @@ int value = 0;
 PiGPIO::PiGPIO(QObject *parent) : QThread(parent)
 {
 
-    PiGPIO::gpio_export( "3", "out");
-    loop_lock = false;
     read_flag = false;
     connect(&m_timer, &QTimer::timeout, this, &PiGPIO::timeout);
-//    PiGPIO::start();
-//    connect(&m_timer, &QTimer::timeout, this, &PiGPIO::main_loop);
+
     m_timer.setInterval(1000);
-     m_timer.start();
-    m_display = "Starting";
+    m_timer.start();
+    m_display = "Timer Starting";
     qInfo() << m_display;
     emit notice(QVariant(m_display));
     int ret;
-    ret = PiGPIO::Square_Init();
-    if (ret < 0) {
-        qInfo() << "Signal Generator Square wave Inint failed!!.";
-    }
-    wave_mode = SQUARE;
-    qInfo() << "###### after sig gen init.";
-    ret = PiGPIO::AD7706_Init();
-    if (ret < 0) {
-        qInfo() << "Current sensor Inint failed!!.";
-    }
-    PiGPIO::max31865_Init();
+
     sin_gen_flag = false;
     sqr_gen_flag = false;
-
-
-//    PiGPIO::exec();
-
 }
 
 
@@ -54,15 +37,13 @@ void PiGPIO::gpio_export(QString pinNum, QString pinDirc)
 
 int PiGPIO::Sinusoid_Init()
 {
-    qInfo() << "PiGPIO: Sinusoid_Init function";
     int ret = 0;
     spi_device *spi_dev;
     struct ad9833_init_param init_param;
 
     ret = Aux_Spi_Init(&spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
-    if (ret < 0) {
-        return -1;
-    }
+    if (ret < 0)
+        return AUX_SPI_INIT_ERROR;
 
     /* Set Relay ON */
     /* RELAY K1 */
@@ -74,52 +55,43 @@ int PiGPIO::Sinusoid_Init()
     init_param.spi_dev = spi_dev;
 
     ret = ad9833_init(&ad9833_dev, init_param);
-    if (ret < -1) {  // TODO: FIX ERROR CODE
-        return -2;
+    if (ret < 0) {  // TODO: FIX ERROR CODE
+        return AD9833_INIT_ERROR;
     }
 
     ad9833_out_mode(ad9833_dev, AD9833_OUT_SINUSOID);  // #TODO:
-
     return 0;
 }
 
 int PiGPIO::Square_Init()
 {
-    qInfo() << "PiGPIO: Square wave Init.";
     int ret = 0;
     spi_device *spi_dev;
     struct ad9833_init_param init_param;
-    qInfo() << "Aux SPI Init";
     ret = Aux_Spi_Init(&spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
-    if (ret < 0) {
-        return -1;
-    }
-    qInfo() << "PiGPIO: Aux SPI successfullt inited.";
+    if (ret < 0)
+        return AUX_SPI_INIT_ERROR;
     /* Set Relay OFF */
     /* RELAY K1 */
     bcm2835_gpio_fsel(RELAY_K1_GPIO, BCM2835_GPIO_FSEL_OUTP);
     bcm2835_gpio_write(RELAY_K1_GPIO, LOW);  // in Square wave mode, the relay shoul be off
     bcm2835_delay(1);
-    qInfo() << "PiGPIO: GPIO successfullt inited.";
     init_param.act_device = ID_AD9833;
     init_param.spi_dev = spi_dev;
-    qInfo() << "PiGPIO: ad9833_init...";
     ret = ad9833_init(&ad9833_dev, init_param);
-    qInfo() << "PiGPIO: ad9833_init successfullt inited.";
-    if (ret < -1) {  // TODO: FIX ERROR CODE
-        return -2;
+    if (ret < 0) {  // TODO: FIX ERROR CODE
+        return AD9833_INIT_ERROR;
     }
     // TODO: Duty cycle should be checked!
     ad9833_out_mode(ad9833_dev, AD9833_OUT_DAC_DATA_MSB);
-
     return 0;
 }
 
 int PiGPIO::AD7706_Init()
 {
-    int ret = Aux_Spi_Init(&ad770x_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS_NONE);
+    int ret = Aux_Spi_Init(&ad770x_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS1);
     if (ret < 0)
-        return ret;
+        return AUX_SPI_INIT_ERROR;
     ad7706Reset(ad770x_spi_dev);
     ad7706Init(ad770x_spi_dev, CHN_AIN1, CLK_DIV_1, UNIPOLAR, GAIN_1, UPDATE_RATE_50);
     ad7706Init(ad770x_spi_dev, CHN_AIN2, CLK_DIV_1, UNIPOLAR, GAIN_1, UPDATE_RATE_50);
@@ -162,26 +134,10 @@ int PiGPIO::max31865_Init()
 
 void PiGPIO::timeout()
 {
-//    float temp;
-//    QVariantList current_temp;
-//    QVariantList current;
     m_display = QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss");
     const QMutexLocker locker(&m_mutex);
     read_flag = true;
-//    qInfo() << "READ FLAG " << read_flag;
-//    current = PiGPIO::read_current();
-//    temp = PiGPIO::read_temperature();
-    qInfo() << this << "******PiGPIO: " << QThread::currentThreadId();
-//    current_temp.append(current[0]);
-//    current_temp.append(current[1]);
-////    qInfo() << "Current: " << current[1];
-////    qInfo() << "temp: " << temp;
-//    current_temp.append(temp);
-//    emit print_current(current_temp);
-//    read_flag = false;
     emit notice(QVariant(m_display));
-
-
 }
 
 void PiGPIO::timer_start()
@@ -238,21 +194,33 @@ QVariantList PiGPIO::read_current()
     double avg_ch2 = 0;
     double current_P15 = 0;
     double current_N15 = 0;
-
+    double result = 0.0f;
     int i = 0;
     sum_ch1 = 0;
     sum_ch2 = 0;
     for(i = 0; i< 12; i++){
-        sum_ch1 = sum_ch1 + readADResultDouble(ad770x_spi_dev, CHN_AIN1, 0, 1.225);
+        ret = readADResultDouble(ad770x_spi_dev, &result,CHN_AIN1, 0, 1.225, UNIPOLAR, 1);
+        if(ret < 0)
+        {
+            emit error_occured("PiGPIO Thread: read_current func, error code="+QString::number(AD7706_READ_TIMEOUT_ERROR));
+            i = 12;
+        }
+        sum_ch1 += result;
     }
     for(i = 0; i< 12; i++){
-        sum_ch2 = sum_ch2 + readADResultDouble(ad770x_spi_dev, CHN_AIN2, 0, 1.225);
+        ret = readADResultDouble(ad770x_spi_dev, &result,CHN_AIN2, 0, 1.225, UNIPOLAR, 1);
+        if(ret < 0)
+        {
+            emit error_occured("PiGPIO Thread: read_current func, error code="+QString::number(AD7706_READ_TIMEOUT_ERROR));
+            i = 12;
+        }
+        sum_ch1 += result;
     }
-    double stop_time = clock();
     avg_ch1 = sum_ch1 / i;
     avg_ch2 = sum_ch2 / i;
-    current_P15 = (avg_ch1 + 0) / 5.6;
-    current_N15 = (avg_ch2 + 0) / 5.6;
+    double opamp_gain = 5.6;
+    current_P15 = ((avg_ch1 + 0) / 5.6) / opamp_gain;
+    current_N15 = ((avg_ch2 + 0) / 5.6) / opamp_gain;
     QVariantList current;
     current.append(current_P15);
     current.append(current_N15);
@@ -272,28 +240,28 @@ float PiGPIO::read_temperature()
    if (fault) {
        emit temperature_fault_notice("Fault " + fault);
    if (fault & MAX31865_FAULT_HIGHTHRESH) {
-           qInfo() << "RTD High Threshold\n";
-           emit temperature_fault_notice("RTD High Threshold\n");
+           qInfo() << "PiGPIO Thread: read_temperature func, RTD High Threshold\n";
+           emit error_occured("PiGPIO Thread: read_temperature func,RTD High Threshold\n");
        }
    if (fault & MAX31865_FAULT_LOWTHRESH) {
-           qInfo() << "RTD Low Threshold\n";
-           emit temperature_fault_notice("RTD Low Threshold\n");
+           qInfo() << "PiGPIO Thread: read_temperature func,RTD Low Threshold\n";
+           emit error_occured("PiGPIO Thread: read_temperature func,RTD Low Threshold\n");
        }
    if (fault & MAX31865_FAULT_REFINLOW) {
-           qInfo() << "REFIN- > 0.85 x Bias\n";
-           emit temperature_fault_notice("REFIN- > 0.85 x Bias\n");
+           qInfo() << "PiGPIO Thread: read_temperature func, REFIN- > 0.85 x Bias\n";
+           emit error_occured("PiGPIO Thread: read_temperature func,REFIN- > 0.85 x Bias\n");
        }
    if (fault & MAX31865_FAULT_REFINHIGH) {
-           qInfo() << "REFIN- < 0.85 x Bias - FORCE- open\n";
-           emit temperature_fault_notice("REFIN- < 0.85 x Bias - FORCE- open\n");
+           qInfo() << "PiGPIO Thread: read_temperature func, REFIN- < 0.85 x Bias - FORCE- open\n";
+           emit error_occured("PiGPIO Thread: read_temperature func, REFIN- < 0.85 x Bias - FORCE- open\n");
        }
    if (fault & MAX31865_FAULT_RTDINLOW) {
-           qInfo() << "RTDIN- < 0.85 x Bias - FORCE- open\n";
-           emit temperature_fault_notice("RTDIN- < 0.85 x Bias - FORCE- open\n");
+           qInfo() << "PiGPIO Thread: read_temperature func, RTDIN- < 0.85 x Bias - FORCE- open\n";
+           emit error_occured("PiGPIO Thread: read_temperature func, RTDIN- < 0.85 x Bias - FORCE- open\n");
        }
    if (fault & MAX31865_FAULT_OVUV) {
-           qInfo() << "Under/Over voltage\n";
-           emit temperature_fault_notice("Under/Over voltage\n");
+           qInfo() << "PiGPIO Thread: read_temperature func, Under/Over voltage\n";
+           emit error_occured("PiGPIO Thread: read_temperature func, Under/Over voltage\n");
        }
 
        max31865_clear_fault(max31865_dev);
@@ -303,16 +271,20 @@ float PiGPIO::read_temperature()
 
 void PiGPIO::run()
 {
-    qInfo() << "Inside EXEC Loop ////////////////////////////////";
+    qInfo() << "<<<<<<<<<<  RUN Loop Started  >>>>>>>>>>";
+    int ret = PiGPIO::Square_Init();
+    if (ret < 0)
+        emit error_occured("PiGPIO Thread: Square_Init func, error code="+QString::number(ret));
+    wave_mode = SQUARE;
+    ret = PiGPIO::AD7706_Init();
+    if (ret < 0) {
+        emit error_occured("PiGPIO Thread: AD7706_Init func, error code="+QString::number(ret));
+    }
+    ret = PiGPIO::max31865_Init();
+    if (ret < 0) {
+        emit error_occured("PiGPIO Thread: max31865_Init func, error code="+QString::number(MAX31865_INIT_ERROR));
+    }
 
-
-
-//    forever {
-//            if ( QThread::currentThread()->isInterruptionRequested() ) {
-//                qInfo() << ">>>>>>>>>>>>>>Interrrupt Loop.";
-//                return;
-//            }
-//    }
     while(true)
     {
         if ( QThread::currentThread()->isInterruptionRequested() ) {
@@ -325,9 +297,10 @@ void PiGPIO::run()
             const QMutexLocker locker(&m_mutex);
             if (wave_mode != SIN)
             {
-                PiGPIO::Sinusoid_Init();
+                ret = PiGPIO::Sinusoid_Init();
+                if (ret < 0)
+                    emit error_occured("PiGPIO Thread: Sinusoid_Init func, error code="+QString::number(ret));
                 wave_mode = SIN;
-                qInfo() << "Initializing Sinusoid Wave...";
             }
             else {
                 int ret = Aux_Spi_Init(&ad9833_dev->spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
@@ -349,8 +322,9 @@ void PiGPIO::run()
             const QMutexLocker locker(&m_mutex);
             if (wave_mode != SQUARE)
             {
-                qInfo() << "Initializing Square Wave...";
-                PiGPIO::Square_Init();
+                ret = PiGPIO::Square_Init();
+                if (ret < 0)
+                    emit error_occured("PiGPIO Thread: Square_Init func, error code="+QString::number(ret));
                 wave_mode = SQUARE;
 
             }
@@ -362,7 +336,6 @@ void PiGPIO::run()
             }
             qInfo() << "#########Sqr Generator, Frequency= " << sqr_freq;
             ad9833_set_freq(ad9833_dev, 0, sqr_freq);
-        //    qInfo() << "Square Wave setting phase";
             ad9833_set_phase(ad9833_dev, 0, 0.0);
             ad9833_select_freq_reg(ad9833_dev, 0);
             ad9833_select_phase_reg(ad9833_dev, 0);
@@ -377,14 +350,11 @@ void PiGPIO::run()
             float temp;
             QVariantList current_temp;
             QVariantList current;
-            qInfo() << "Main Loop.";
             temp = PiGPIO::read_temperature();
-            qInfo() << "temp: " << temp;
             current = PiGPIO::read_current();
             current_temp.append(current[0]);
             current_temp.append(current[1]);
-            qInfo() << "Current: " << current[1];
-
+            qInfo() << "Current: " << current[0]  << " , " << current[1] << " Temp: " << temp;
             current_temp.append(temp);
             emit print_current(current_temp);
 //            const QMutexLocker locker(&m_mutex);
@@ -394,7 +364,3 @@ void PiGPIO::run()
         }
 }
 
-void PiGPIO::dummy()
-{
-    qInfo() << "OOOOOOOOOOOOOOOOOOOOO Inside dummy";
-}
