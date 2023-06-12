@@ -1,17 +1,26 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.9
 import QtQuick.Controls 1.4
+import QtQuick.Controls 2.12
 import QtQuick.Window 2.5
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.1
+import QtGraphicalEffects 1.15
 
 ApplicationWindow {
     id: applicationWindow
-//    flags: Qt.FramelessWindowHint
+    flags: Qt.FramelessWindowHint
     width: 1280
     height: 800
     visible: true
-    color: "#307097"
+    color: "#efefef"
+//    background: BorderImage {
+//        id: main_background
+//        source: "bg5.jpg"
+//        width: 1280; height: 1280
+//        border.left: 5; border.top: 5
+//        border.right: 5; border.bottom: 5
+//    }
     property double gain;
     property double offset;
     property double gp_value;
@@ -32,6 +41,17 @@ ApplicationWindow {
     property string over_shoot: ""
     property bool dynamic_clicked: false
     property string export_xlsx_path: ""
+
+
+//    LinearGradient {
+//        anchors.fill: parent
+//        start: Qt.point(0, 0)
+//        end: Qt.point(0, 300)
+//        gradient: Gradient {
+//            GradientStop { position: 0.0; color: "white" }
+//            GradientStop { position: 1.0; color: "black" }
+//        }
+//    }
 
     Connections {
         target: bridge
@@ -364,12 +384,12 @@ ApplicationWindow {
         width: 200
         x: 5
         height: parent.height - 5
-        spacing: 10
+        spacing: 35
         PushBottun
         {
             id: gp
             width: 220
-            height: 100
+            height: 60
             button_name: "G+"
             txtSize: 22
             display: "0.00"
@@ -384,7 +404,7 @@ ApplicationWindow {
         {
             id: gn
             width: 220
-            height: 100
+            height: 60
             button_name: "G-"
             txtSize: 22
             display: "0.00"
@@ -400,7 +420,7 @@ ApplicationWindow {
         {
             id: zp
             width: 220
-            height: 100
+            height: 60
             button_name: "0+"
             txtSize: 22
             display: "0.00"
@@ -415,7 +435,7 @@ ApplicationWindow {
         {
             id: zn
             width: 220
-            height: 100
+            height: 60
             button_name: "0-"
             txtSize: 22
             display: "0.00"
@@ -430,7 +450,7 @@ ApplicationWindow {
         {
             id: p180
             width: 220
-            height: 100
+            height: 60
             button_name: "180+"
             txtSize: 22
             display: "0.00"
@@ -445,7 +465,7 @@ ApplicationWindow {
         {
             id: n180
             width: 220
-            height: 100
+            height: 60
             button_name: "180-"
             txtSize: 22
             display: "0.00"
@@ -460,8 +480,8 @@ ApplicationWindow {
         {
             id: dynm
             width: 220
-            height: 100
-            button_name: "Dynamic"
+            height: 70
+            button_name: "DYNAMIC"
             txtSize: 16
             visibleNumber: false
             display: "0.00"
@@ -509,6 +529,10 @@ ApplicationWindow {
         width: 1000
         height: 50
         currentIndex: 0
+        background: Rectangle {
+                color: "#f4d37c"
+                radius: 10
+            }
         TabButton {
             y: 0
             width: 200
@@ -518,6 +542,10 @@ ApplicationWindow {
             font.pointSize: 14
             clip: false
             visible: true
+            background: Rectangle {
+                        color: bar.currentIndex == 0 ? "#f4d37c" : "#2F2E2E"
+                        radius: 10
+                    }
             onClicked: {
                 col.enabled = true
                 bridge.static_real_time_stop()
@@ -531,6 +559,10 @@ ApplicationWindow {
             text: qsTr("Continuous")
             anchors.verticalCenter: parent.verticalCenter
             font.pointSize: 14
+            background: Rectangle {
+                        color: bar.currentIndex == 1 ? "#f4d37c" : "#2F2E2E"
+                        radius: 10
+                    }
             onClicked:
             {
                 bridge.static_real_time_start()
@@ -544,6 +576,10 @@ ApplicationWindow {
             text: qsTr("Calibration")
             anchors.verticalCenter: parent.verticalCenter
             font.pointSize: 14
+            background: Rectangle {
+                        color: bar.currentIndex == 2 ? "#f4d37c" : "#2F2E2E"
+                        radius: 10
+                    }
             onClicked: {
                 col.enabled = true
                 bridge.static_real_time_stop()
@@ -556,6 +592,10 @@ ApplicationWindow {
             text: qsTr("Debug")
             anchors.verticalCenter: parent.verticalCenter
             font.pointSize: 14
+            background: Rectangle {
+                        color: bar.currentIndex == 3 ? "#f4d37c" : "#2F2E2E"
+                        radius: 10
+                    }
             onClicked: {
                 col.enabled = true
                 bridge.static_real_time_stop()
@@ -568,6 +608,10 @@ ApplicationWindow {
             text: qsTr("Read me")
             anchors.verticalCenter: parent.verticalCenter
             font.pointSize: 14
+            background: Rectangle {
+                        color: bar.currentIndex == 4 ? "#f4d37c" : "#2F2E2E"
+                        radius: 10
+                    }
             onClicked: {
                 col.enabled = true
                 bridge.static_real_time_stop()
@@ -590,8 +634,19 @@ ApplicationWindow {
             Rectangle
             {
                 height: 550
-                color: "white"
+                color: "#F4F4F4"
                 anchors.fill: parent
+                radius: 10
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    transparentBorder: true
+                    color: "gray"
+                    samples: 17
+                    radius: 6
+                    spread: 0.0
+                    horizontalOffset: 0
+                    verticalOffset: 0
+                            }
                 ParameterTab {
                     id: parameterTab
                     cellWidth: 150
@@ -627,7 +682,27 @@ ApplicationWindow {
                         id: save
                         x: 814
                         y: 366
-                        text: qsTr("Save")
+                        width: 120
+                        height: 40
+                        text: "<font color=\"white\">SAVE</font>"
+                        font.pixelSize: 14
+                        background: Rectangle {
+                            width: parent.height
+                            height: parent.width
+                            anchors.centerIn: parent
+                            color: parent.down ? "#fff" :
+                                  (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            border.width: 1
+                            border.color: "white"
+                            radius: 10
+                            rotation: 90
+
+                            gradient: Gradient {
+                                GradientStop { position: 0.0; color: save.pressed ? "#0cebeb" : "#02AAB0"}
+                                GradientStop { position: 0.51; color: save.pressed ?"#20e3b2":"#00CDAC" }
+                                 GradientStop { position: 1.0; color: save.pressed ?"#0cebeb": "#02AAB0"}
+                                        }
+                        }
                         onClicked: saveDialog.open()
                     }
 
@@ -635,7 +710,27 @@ ApplicationWindow {
                         id: reset
                         x: 814
                         y: 430
-                        text: qsTr("Reset")
+                        width: 120
+                        height: 40
+                        text: "<font color=\"white\">RESET</font>"
+                        font.pixelSize: 14
+                        background: Rectangle {
+                            width: parent.height
+                            height: parent.width
+                            anchors.centerIn: parent
+                            color: parent.down ? "#fff" :
+                                  (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            border.width: reset.activeFocus ? 2 : 1
+                            border.color: "white"
+                            radius: 10
+                            rotation: 90
+
+                            gradient: Gradient {
+                                GradientStop { position: 0.0; color: reset.pressed ? "#DD5E89" : "#EB3349"}
+                                GradientStop { position: 0.51; color: reset.pressed ?"#F7BB97":"#F45C43" }
+                                 GradientStop { position: 1.0; color: reset.pressed ?"#DD5E89": "#EB3349"}
+                                        }
+                        }
                         onClicked: {
                             gp_flag = false
                             gn_flag = false
@@ -677,9 +772,27 @@ ApplicationWindow {
                         id: exportFile
                         x: 814
                         y: 485
-                        width: 80
-                        height: 25
-                        text: qsTr("Export")
+                        width: 120
+                        height: 40
+                        text: "<font color=\"white\">EXPORT</font>"
+                        font.pixelSize: 14
+                        background: Rectangle {
+                            width: parent.height
+                            height: parent.width
+                            anchors.centerIn: parent
+                            color: parent.down ? "#fff" :
+                                  (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            border.width: reset.activeFocus ? 2 : 1
+                            border.color: "white"
+                            radius: 10
+                            rotation: 90
+
+                            gradient: Gradient {
+                                GradientStop { position: 0.0; color: exportFile.pressed ? "#085078" : "#16222A"}
+                                GradientStop { position: 0.51; color: exportFile.pressed ?"#85D8CE":"#3A6073" }
+                                 GradientStop { position: 1.0; color: exportFile.pressed ?"#085078": "#16222A"}
+                                        }
+                        }
                         onClicked: fileDialog.open()
                     }
 
@@ -694,6 +807,7 @@ ApplicationWindow {
                 width: 146
                 height: 40
                 font.pixelSize: 16
+                placeholderText: qsTr("Enter serial")
                 horizontalAlignment: Text.AlignHCenter
                 inputMethodHints: Qt.ImhFormattedNumbersOnly
                 validator: IntValidator {
@@ -719,8 +833,19 @@ ApplicationWindow {
             id: logTab
             Rectangle
             {
-                color: "white"
+                color: "#F4F4F4"
                 anchors.fill: parent
+                radius: 10
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    transparentBorder: true
+                    color: "gray"
+                    samples: 17
+                    radius: 6
+                    spread: 0.0
+                    horizontalOffset: 0
+                    verticalOffset: 0
+                            }
                 NumIndic {
                     id: static_real_time
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -738,8 +863,19 @@ ApplicationWindow {
 
             Rectangle
             {
-                color: "white"
+                color: "#F4F4F4"
                 anchors.fill: parent
+                radius: 10
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    transparentBorder: true
+                    color: "gray"
+                    samples: 17
+                    radius: 6
+                    spread: 0.0
+                    horizontalOffset: 0
+                    verticalOffset: 0
+                            }
                 CalibrationTab {
                     id: calibTab
                     anchors.fill: parent
@@ -782,8 +918,19 @@ ApplicationWindow {
             id: continueTab
             Rectangle
             {
-                color: "white"
+                color: "#F4F4F4"
                 anchors.fill: parent
+                radius: 10
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    transparentBorder: true
+                    color: "gray"
+                    samples: 17
+                    radius: 6
+                    spread: 0.0
+                    horizontalOffset: 0
+                    verticalOffset: 0
+                            }
                 ContinousLogging {
                     id: continousLog
                     anchors.fill: parent
@@ -803,8 +950,19 @@ ApplicationWindow {
             id: readmeTab
             Rectangle
             {
-                color: "white"
+                color: "#F4F4F4"
                 anchors.fill: parent
+                radius: 10
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    transparentBorder: true
+                    color: "gray"
+                    samples: 17
+                    radius: 6
+                    spread: 0.0
+                    horizontalOffset: 0
+                    verticalOffset: 0
+                            }
                 TextArea {
                     id: txtareaReadme
                     anchors.fill: parent
@@ -846,7 +1004,7 @@ ApplicationWindow {
         y: 30
         width: 173
         height: 50
-        color: "#ffffff"
+        color: "black"
         text: qsTr("Text")
         font.pixelSize: 16
         verticalAlignment: Text.AlignVCenter
@@ -922,9 +1080,4 @@ ApplicationWindow {
 
 
 
-/*##^##
-Designer {
-    D{i:1;anchors_y:0}D{i:2;anchors_x:44}D{i:10;invisible:true}D{i:11;invisible:true}
-D{i:19;anchors_height:400;anchors_width:400;anchors_x:15;anchors_y:8}D{i:36;invisible:true}
-}
-##^##*/
+

@@ -1,5 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.9
+import QtGraphicalEffects 1.0
+import QtQuick.Controls.Styles 1.4
 
 Item {
     id: root
@@ -72,14 +74,28 @@ Item {
                     id: buttonP1
                     width: 150
                     height: 50
-                    text: qsTr("Point1 Capture")
                     anchors.top: parent.top
                     anchors.topMargin: parent.height / 6
                     transformOrigin: Item.Center
                     anchors.horizontalCenter: parent.horizontalCenter
+                    text: "<font color=\"white\">Point1 Capture</font>"
+                    font.pixelSize: 14
                     background: Rectangle {
-                                    color: parent.down ? "#bbbbbb" :
-                                            (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                        width: parent.height
+                        height: parent.width
+                        anchors.centerIn: parent
+                        color: parent.down ? "#fff" :
+                              (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                        border.width: 1
+                        border.color: "white"
+                        radius: 10
+                        rotation: 90
+
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: buttonP1.pressed ? "#DD5E89" : "#41295a"}
+                            GradientStop { position: 0.51; color: buttonP1.pressed ?"#F7BB97": "#2F0743" }
+                             GradientStop { position: 1.0; color: buttonP1.pressed ?"#DD5E89": "#41295a" }
+                                    }
                     }
                     onClicked: p1clicked()
                 }
@@ -97,6 +113,7 @@ Item {
                     id: voltage1
                     y: parent.height * 5 / 6
                     width: 250
+                    placeholderText: qsTr("Enter voltmeter value")
                     anchors.horizontalCenter: parent.horizontalCenter
                     font.pixelSize: 24
                     text: kybrdPopup.kybrdValue
@@ -120,14 +137,28 @@ Item {
                     id: buttonP2
                     width: 150
                     height: 50
-                    text: qsTr("Point2 Capture")
                     anchors.top: parent.top
                     anchors.topMargin: parent.height / 6
                     transformOrigin: Item.Center
                     anchors.horizontalCenter: parent.horizontalCenter
+                    text: "<font color=\"white\">Point2 Capture</font>"
+                    font.pixelSize: 14
                     background: Rectangle {
-                                    color: parent.down ? "#bbbbbb" :
-                                            (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                        width: parent.height
+                        height: parent.width
+                        anchors.centerIn: parent
+                        color: parent.down ? "#fff" :
+                              (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                        border.width: 1
+                        border.color: "white"
+                        radius: 10
+                        rotation: 90
+
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: buttonP2.pressed ? "#DD5E89" : "#41295a"}
+                            GradientStop { position: 0.51; color: buttonP2.pressed ?"#F7BB97": "#2F0743" }
+                             GradientStop { position: 1.0; color: buttonP2.pressed ?"#DD5E89": "#41295a" }
+                                    }
                     }
                     onClicked: p2clicked()
                 }
@@ -145,6 +176,7 @@ Item {
                     id: voltage2
                     width: 250
                     y: parent.height * 5 / 6
+                    placeholderText: qsTr("Enter voltmeter value")
                     anchors.horizontalCenter: parent.horizontalCenter
                     font.pixelSize: 24
                     text: kybrdPopup.kybrdValue
@@ -207,7 +239,7 @@ Item {
                         y: 20
                         width: 100
                         height: 50
-                        color: "#faf8f6"
+                        color: "#fafbfb"
                         Text {
                             id: element3
                             color: "#3f1d28"
@@ -218,6 +250,16 @@ Item {
                             horizontalAlignment: Text.AlignHCenter
                         }
                         anchors.verticalCenter: parent.verticalCenter
+                        layer.enabled: true
+                        layer.effect: DropShadow {
+                            transparentBorder: true
+                            color: "gray"
+                            samples: 17
+                            radius: 6
+                            spread: 0.0
+                            horizontalOffset: 0
+                            verticalOffset: 0
+                                    }
                     }
 
                     Text {
@@ -240,7 +282,7 @@ Item {
                         y: 20
                         width: 100
                         height: 50
-                        color: "#faf8f6"
+                        color: "#fafbfb"
                         Text {
                             id: element4
                             text: calculate_d
@@ -249,6 +291,16 @@ Item {
                             verticalAlignment: Text.AlignVCenter
                             horizontalAlignment: Text.AlignHCenter
                         }
+                        layer.enabled: true
+                        layer.effect: DropShadow {
+                            transparentBorder: true
+                            color: "gray"
+                            samples: 17
+                            radius: 6
+                            spread: 0.0
+                            horizontalOffset: 0
+                            verticalOffset: 0
+                                    }
                         anchors.verticalCenter: parent.verticalCenter
                     }
 
@@ -269,13 +321,26 @@ Item {
                         id: button2
                         height: 50
                         width: 150
-                        text: qsTr("Calculate")
                         checkable: false
+                        text: "<font color=\"white\">CALCULATE</font>"
                         anchors.horizontalCenter: parent.horizontalCenter
                         font.pixelSize: 18
                         background: Rectangle {
-                                        color: parent.down ? "#bbbbbb" :
-                                                (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            width: parent.height
+                            height: parent.width
+                            anchors.centerIn: parent
+                            color: parent.down ? "#fff" :
+                                  (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            border.width: 1
+                            border.color: "white"
+                            radius: 10
+                            rotation: 90
+
+                            gradient: Gradient {
+                                GradientStop { position: 0.0; color: button2.pressed ? "#0cebeb" : "#ff7e5f"}
+                                GradientStop { position: 0.51; color: button2.pressed ?"#20e3b2":"#feb47b" }
+                                 GradientStop { position: 1.0; color: button2.pressed ?"#0cebeb": "#ff7e5f"}
+                                        }
                         }
                         onClicked: calculate()
                     }
@@ -284,12 +349,25 @@ Item {
                         id: button3
                         height: 50
                         width: 150
-                        text: qsTr("Save")
                         anchors.horizontalCenter: parent.horizontalCenter
+                        text: "<font color=\"white\">SAVE</font>"
                         font.pixelSize: 18
                         background: Rectangle {
-                            color: parent.down ? "#bbbbbb" :
-                                                 (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            width: parent.height
+                            height: parent.width
+                            anchors.centerIn: parent
+                            color: parent.down ? "#fff" :
+                                  (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            border.width: 1
+                            border.color: "white"
+                            radius: 10
+                            rotation: 90
+
+                            gradient: Gradient {
+                                GradientStop { position: 0.0; color: button3.pressed ? "#0cebeb" : "#02AAB0"}
+                                GradientStop { position: 0.51; color: button3.pressed ?"#20e3b2":"#00CDAC" }
+                                 GradientStop { position: 1.0; color: button3.pressed ?"#0cebeb": "#02AAB0"}
+                                        }
                         }
                         onClicked: save()
                     }
@@ -298,6 +376,8 @@ Item {
                         id: button4
                         width: 150
                         height: 50
+                        enabled: false
+                        visible: false
                         text: qsTr("Internal Calibration")
                         anchors.horizontalCenter: parent.horizontalCenter
                         checkable: false
@@ -320,8 +400,10 @@ Item {
 
 /*##^##
 Designer {
-    D{i:15;anchors_height:192.5;anchors_width:1000;anchors_y:0}D{i:4;anchors_y:0}D{i:21;anchors_x:50}
-D{i:24;anchors_x:200}D{i:26;anchors_height:70;anchors_width:175;anchors_x:0;anchors_y:0}
-D{i:27;anchors_y:0}D{i:17;anchors_height:400;anchors_width:200}D{i:1;anchors_height:400;anchors_width:400}
+    D{i:17;anchors_height:400;anchors_width:200}D{i:21;anchors_x:50}D{i:24;anchors_x:200}
+D{i:23;anchors_height:192.5;anchors_width:1000;anchors_y:0}D{i:15;anchors_height:192.5;anchors_width:1000;anchors_y:0}
+D{i:4;anchors_y:0}D{i:29;anchors_x:50}D{i:33;anchors_x:200}D{i:35;anchors_height:70;anchors_width:175;anchors_x:0;anchors_y:0}
+D{i:27;anchors_y:0}D{i:26;anchors_height:70;anchors_width:175;anchors_x:0;anchors_y:0}
+D{i:37;anchors_y:0}D{i:25;anchors_height:400;anchors_width:200}D{i:1;anchors_height:400;anchors_width:400}
 }
 ##^##*/

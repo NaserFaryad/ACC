@@ -1,19 +1,21 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtGraphicalEffects 1.0
+import QtQuick.Controls.Styles 1.4
 
 Item {
     id: root
     width: 100
     height: 50
-    property color color: "lightgray"
-    property color labelColor: "white"
+    property color color: "#fafbfb"
+    property color labelColor: "black"
     property color textColor: "black"
     property string labelText: "Label"
     property string indicText: "0.000"
-    property color bgColor: "#2c2d2e"
+    property color bgColor: "transparent"
     property int textSize: 15
     property int labelSize: 10
-    property int rectRadius: 2
+    property int rectRadius: 10
     property int textMargin: 2
     property int labelMargin: 2
     property bool labelBold: false
@@ -62,6 +64,16 @@ Item {
                 font.bold: textBold
                 font.pixelSize: root.textSize
             }
+            layer.enabled: true
+            layer.effect: DropShadow {
+                transparentBorder: true
+                color: "gray"
+                samples: 17
+                radius: 4
+                spread: 0.0
+                horizontalOffset: 2
+                verticalOffset: 2
+                        }
         }
     }
 

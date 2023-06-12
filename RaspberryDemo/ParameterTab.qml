@@ -1,5 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.9
+import QtGraphicalEffects 1.0
+import QtQuick.Controls.Styles 1.4
 
 Item {
     id: root
@@ -44,7 +46,17 @@ Item {
             width: cellWidth
             height: cellHeight
             color: cellColor
-
+            radius: 10
+            layer.enabled: true
+            layer.effect: DropShadow {
+                transparentBorder: true
+                color: "gray"
+                samples: 17
+                radius: 6
+                spread: 0.0
+                horizontalOffset: 0
+                verticalOffset: 0
+                        }
             Text {
                 id: text11
                 color: textColor11
@@ -61,6 +73,17 @@ Item {
             width: cellWidth
             height: cellHeight
             color: cellColor
+            radius: 10
+            layer.enabled: true
+            layer.effect: DropShadow {
+                transparentBorder: true
+                color: "gray"
+                samples: 17
+                radius: 6
+                spread: 0.0
+                horizontalOffset: 0
+                verticalOffset: 0
+                        }
 
             Text {
                 id: text12
@@ -79,6 +102,17 @@ Item {
             width: cellWidth
             height: cellHeight
             color: cellColor
+            radius: 10
+            layer.enabled: true
+            layer.effect: DropShadow {
+                transparentBorder: true
+                color: "gray"
+                samples: 17
+                radius: 6
+                spread: 0.0
+                horizontalOffset: 0
+                verticalOffset: 0
+                        }
 
             Text {
                 id: text13
@@ -97,7 +131,17 @@ Item {
             width: cellWidth
             height: cellHeight
             color: cellColor
-
+            radius: 10
+            layer.enabled: true
+            layer.effect: DropShadow {
+                transparentBorder: true
+                color: "gray"
+                samples: 17
+                radius: 6
+                spread: 0.0
+                horizontalOffset: 0
+                verticalOffset: 0
+                        }
             Text {
                 id: text21
                 color: textColor21
@@ -114,6 +158,17 @@ Item {
             width: cellWidth
             height: cellHeight
             color: cellColor
+            radius: 10
+            layer.enabled: true
+            layer.effect: DropShadow {
+                transparentBorder: true
+                color: "gray"
+                samples: 17
+                radius: 6
+                spread: 0.0
+                horizontalOffset: 0
+                verticalOffset: 0
+                        }
 
             Text {
                 id: text22
@@ -131,6 +186,17 @@ Item {
             width: cellWidth
             height: cellHeight
             color: cellColor
+            radius: 10
+            layer.enabled: true
+            layer.effect: DropShadow {
+                transparentBorder: true
+                color: "gray"
+                samples: 17
+                radius: 6
+                spread: 0.0
+                horizontalOffset: 0
+                verticalOffset: 0
+                        }
 
             Text {
                 id: text23
@@ -153,6 +219,17 @@ Item {
             background: Rectangle {
                             color: parent.down ? "#bbbbbb" :
                                     (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            radius: 10
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                transparentBorder: true
+                                color: "gray"
+                                samples: 17
+                                radius: 10
+                                spread: 0.0
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                                        }
                     }
             onClicked: {
                 naturalfreqClicked()
@@ -171,6 +248,17 @@ Item {
             background: Rectangle {
                             color: parent.down ? "#bbbbbb" :
                                     (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            radius: 10
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                transparentBorder: true
+                                color: "gray"
+                                samples: 17
+                                radius: 10
+                                spread: 0.0
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                                        }
                     }
             onClicked: {
                 cuttoffClicked()
@@ -187,6 +275,17 @@ Item {
             background: Rectangle {
                             color: parent.down ? "#bbbbbb" :
                                     (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                            radius: 10
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                transparentBorder: true
+                                color: "gray"
+                                samples: 17
+                                radius: 10
+                                spread: 0.0
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                                        }
                     }
             onClicked: {
                 overshootClicked()

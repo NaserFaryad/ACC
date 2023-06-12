@@ -1,5 +1,8 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.9
+import QtGraphicalEffects 1.0
+import QtQuick.Controls.Styles 1.4
+
 Item {
     id: root
     signal dynclicked()
@@ -124,13 +127,27 @@ Item {
                 id: btnContinDyn
                 x: 20
                 y: 50
-                width: 150
-                height: 50
-                text: qsTr("Continous Dynamic")
+                width: 200
+                height: 60
                 anchors.horizontalCenter: parent.horizontalCenter
+                text: "<font color=\"white\">Continous Dynamic</font>"
+                font.pixelSize: 14
                 background: Rectangle {
-                    color: parent.down ? "#bbbbbb" :
-                                         (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                    width: parent.height
+                    height: parent.width
+                    anchors.centerIn: parent
+                    color: parent.down ? "#fff" :
+                          (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+                    border.width: 1
+                    border.color: "white"
+                    radius: 10
+                    rotation: 90
+
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: btnContinDyn.pressed ? "#DD5E89" : "#41295a"}
+                        GradientStop { position: 0.51; color: btnContinDyn.pressed ?"#F7BB97":"#2F0743" }
+                         GradientStop { position: 1.0; color: btnContinDyn.pressed ?"#DD5E89": "#41295a"}
+                                }
                 }
                 onClicked: dynclicked()
             }
@@ -222,7 +239,7 @@ Item {
             x: 316
             width: root.width/3
             height: root.height
-
+            visible: false
             Frame {
                 id: frame2
                 width: 200
