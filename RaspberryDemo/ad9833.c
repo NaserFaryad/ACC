@@ -93,7 +93,6 @@ int8_t ad9833_init(struct ad9833_dev **device,
 
         struct ad9833_dev *dev;
         uint16_t spi_data = 0;
-        int8_t status = -1;
         dev = (struct ad9833_dev *)malloc(sizeof(*dev));
         if (!dev)
                 return -1;
@@ -149,7 +148,7 @@ int8_t ad9833_init(struct ad9833_dev **device,
         *device = dev;
 
         // status = 0;
-        return status;
+        return 0;
 }
 
 /***************************************************************************//**

@@ -101,6 +101,6 @@ int main(int argc, char *argv[])
     qDebug() << "App path : " << qApp->applicationDirPath();
 
     adcThread.start();
-//    singen.start();
+    singen.start();
     return app.exec();
 }

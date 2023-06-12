@@ -204,7 +204,7 @@ QVariantList PiGPIO::read_current()
         if(ret < 0)
         {
             emit error_occured("PiGPIO Thread: read_current func, error code="+QString::number(AD7706_READ_TIMEOUT_ERROR));
-            i = 12;
+            break;
         }
         sum_ch1 += result1;
     }
@@ -213,10 +213,11 @@ QVariantList PiGPIO::read_current()
         if(ret < 0)
         {
             emit error_occured("PiGPIO Thread: read_current func, error code="+QString::number(AD7706_READ_TIMEOUT_ERROR));
-            i = 12;
+            break;
         }
         sum_ch2 += result2;
     }
+    qInfo() << " ADC RAW VALUEs: " << sum_ch1 << ", " << sum_ch2;
     avg_ch1 = sum_ch1 / i;
     avg_ch2 = sum_ch2 / i;
     double opamp_gain = 5.6;
@@ -281,10 +282,10 @@ void PiGPIO::run()
     if (ret < 0) {
         emit error_occured("PiGPIO Thread: AD7706_Init func, error code="+QString::number(ret));
     }
-    ret = PiGPIO::max31865_Init();
-    if (ret < 0) {
-        emit error_occured("PiGPIO Thread: max31865_Init func, error code="+QString::number(MAX31865_INIT_ERROR));
-    }
+//    ret = PiGPIO::max31865_Init();
+//    if (ret < 0) {
+//        emit error_occured("PiGPIO Thread: max31865_Init func, error code="+QString::number(MAX31865_INIT_ERROR));
+//    }
 
     while(true)
     {
@@ -351,7 +352,7 @@ void PiGPIO::run()
             float temp;
             QVariantList current_temp;
             QVariantList current;
-            temp = PiGPIO::read_temperature();
+//            temp = PiGPIO::read_temperature();
             current = PiGPIO::read_current();
             current_temp.append(current[0]);
             current_temp.append(current[1]);

@@ -5,7 +5,7 @@ import QtQuick.Controls.Styles 1.4
 
 Item {
     id: root
-    signal cliked()
+    signal pb_cliked()
     property string button_name: "button"
     property string display: "..."
     property color buttonColr: "#000000"
@@ -30,6 +30,7 @@ Item {
                 font.bold: txtBold
                 font.pixelSize: root.txtSize
                 anchors.verticalCenter: parent.verticalCenter
+                onClicked: pb_cliked()
                 text: "<font color=\"white\">" + button_name + "</font>"
                 background: Rectangle {
                     width: parent.height
@@ -44,7 +45,7 @@ Item {
                     gradient: Gradient {
                         GradientStop { position: 0.0; color: roundButton.pressed ? "#DD5E89" : "#41295a"}
                         GradientStop { position: 0.51; color: roundButton.pressed ?"#F7BB97": "#2F0743" }
-                         GradientStop { position: 1.0; color: roundButton.pressed ?"#DD5E89": "#41295a" }
+                        GradientStop { position: 1.0; color: roundButton.pressed ?"#DD5E89": "#41295a" }
                                 }
                 }
             }

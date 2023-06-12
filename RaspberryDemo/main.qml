@@ -13,7 +13,7 @@ ApplicationWindow {
     width: 1280
     height: 800
     visible: true
-    color: "#efefef"
+    color: "#F0EADE"
 //    background: BorderImage {
 //        id: main_background
 //        source: "bg5.jpg"
@@ -380,10 +380,12 @@ ApplicationWindow {
 
     Column {
         id: col
-        y: 5
-        width: 200
-        x: 5
-        height: parent.height - 5
+        width: 229
+        height: 690
+        anchors.top: parent.top
+        anchors.topMargin: 100
+        anchors.left: parent.left
+        anchors.leftMargin: 10
         spacing: 35
         PushBottun
         {
@@ -393,7 +395,7 @@ ApplicationWindow {
             button_name: "G+"
             txtSize: 22
             display: "0.00"
-            onCliked: {
+            onPb_cliked: {
                 console.log("G+ Clicked")
                 bridge.pressed_button(0)
                 col.enabled = false
@@ -408,7 +410,7 @@ ApplicationWindow {
             button_name: "G-"
             txtSize: 22
             display: "0.00"
-            onCliked: {
+            onPb_cliked: {
                 console.log("G- Clicked")
                 bridge.pressed_button(1)
                 col.enabled = false
@@ -424,7 +426,7 @@ ApplicationWindow {
             button_name: "0+"
             txtSize: 22
             display: "0.00"
-            onCliked: {
+            onPb_cliked: {
                 console.log("0+ Clicked")
                 bridge.pressed_button(2)
                 col.enabled = false
@@ -439,7 +441,7 @@ ApplicationWindow {
             button_name: "0-"
             txtSize: 22
             display: "0.00"
-            onCliked: {
+            onPb_cliked: {
                 console.log("0- Clicked")
                 bridge.pressed_button(3)
                 col.enabled = false
@@ -454,7 +456,7 @@ ApplicationWindow {
             button_name: "180+"
             txtSize: 22
             display: "0.00"
-            onCliked: {
+            onPb_cliked: {
                 console.log("180+ Clicked")
                 bridge.pressed_button(4)
                 col.enabled = false
@@ -469,7 +471,7 @@ ApplicationWindow {
             button_name: "180-"
             txtSize: 22
             display: "0.00"
-            onCliked: {
+            onPb_cliked: {
                 console.log("180- Clicked")
                 bridge.pressed_button(5)
                 col.enabled = false
@@ -485,7 +487,7 @@ ApplicationWindow {
             txtSize: 16
             visibleNumber: false
             display: "0.00"
-            onCliked: {
+            onPb_cliked: {
                 console.log("Dynamic Clicked")
                 bridge.natural_freq_calc()
                 dynamic_clicked = true
@@ -505,7 +507,7 @@ ApplicationWindow {
         labelSize: 14
         width: 250
         height: 50
-        x: 250
+        x: 25
         y: 30
 
     }
@@ -990,18 +992,19 @@ ApplicationWindow {
 
     NumIndic {
         id: sensCurrentN
-        x: 515
+        x: 400
         y: 30
         width: 250
         height: 50
+        anchors.horizontalCenter: parent.horizontalCenter
         labelText: "Current [-15]"
         labelSize: 14
     }
 
     Text {
         id: date_time
-        x: 780
-        y: 30
+        x: 1077
+        y: 713
         width: 173
         height: 50
         color: "black"
@@ -1081,3 +1084,9 @@ ApplicationWindow {
 
 
 
+
+/*##^##
+Designer {
+    D{i:5;anchors_x:5;anchors_y:5}
+}
+##^##*/

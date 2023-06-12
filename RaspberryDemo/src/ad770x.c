@@ -104,6 +104,7 @@ int readADResultDouble(spi_device *spi_dev, double *result,uint8_t channel, floa
     double result_local = 0.0f;
     unsigned int ad_result_uint = 0;
     // float refOffset = 0.0;
+    fprintf(stderr," channel: %d", channel);
     int ret = 0;
     ret = dataReady(spi_dev, channel, 1000000);
     if (ret < 0)
@@ -114,7 +115,7 @@ int readADResultDouble(spi_device *spi_dev, double *result,uint8_t channel, floa
     setNextOperation(spi_dev, REG_DATA, channel, 1);
     ad_result_uint = readADResultUnsignedInt(spi_dev);
     bcm2835_gpio_write(AD7706_CS, HIGH);
-
+    fprintf(stderr, ">> RAW Value= %X\n",  ad_result_uint);
     // printf("Channel: %d - Raw Value=%d\n", channel, ad_result_uint);
     // int GAIN = 1;
 
@@ -125,6 +126,7 @@ int readADResultDouble(spi_device *spi_dev, double *result,uint8_t channel, floa
     } else {
         return -2;
     }
+    fprintf(stderr, "CHannel= %d,  Value= %f\n", channel, result_local);
     // result = (double) ((double)ad_result_uint-32768) * 1.0 / 32768.0 * VRef - refOffset;
     // result = (double) (VRef / (65535)) * ((double)ad_result_uint / GAIN);  //65535
     *result = result_local;
