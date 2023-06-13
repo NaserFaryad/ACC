@@ -9,7 +9,7 @@ import QtGraphicalEffects 1.15
 
 ApplicationWindow {
     id: applicationWindow
-    flags: Qt.FramelessWindowHint
+//    flags: Qt.FramelessWindowHint
     width: 1280
     height: 800
     visible: true
@@ -59,7 +59,7 @@ ApplicationWindow {
             gp_value = sVolt;
             gp.display = (Math.round(sVolt*1000000)/1000000).toFixed(6)
             gp_flag = true
-            col.enabled = true
+            left_col.enabled = true
             if (gp_flag && gn_flag && zp_flag && zn_flag && p180_flag && n180_flag)
                 js.sensor_param_calc()
 
@@ -68,7 +68,7 @@ ApplicationWindow {
             gn_value = sVolt;
             gn.display = (Math.round(sVolt*1000000)/1000000).toFixed(6)
             gn_flag = true
-            col.enabled = true
+            left_col.enabled = true
             if (gp_flag && gn_flag && zp_flag && zn_flag && p180_flag && n180_flag)
                 js.sensor_param_calc()
         }
@@ -76,7 +76,7 @@ ApplicationWindow {
             zp_value = sVolt;
             zp.display = (Math.round(sVolt*1000000)/1000000).toFixed(6)
             zp_flag = true
-            col.enabled = true
+            left_col.enabled = true
             if (gp_flag && gn_flag && zp_flag && zn_flag && p180_flag && n180_flag)
                 js.sensor_param_calc()
         }
@@ -84,7 +84,7 @@ ApplicationWindow {
             zn_value = sVolt;
             zn.display = (Math.round(sVolt*1000000)/1000000).toFixed(6)
             zn_flag = true
-            col.enabled = true
+            left_col.enabled = true
             if (gp_flag && gn_flag && zp_flag && zn_flag && p180_flag && n180_flag)
                 js.sensor_param_calc()
         }
@@ -92,7 +92,7 @@ ApplicationWindow {
             p180_value = sVolt;
             p180.display = (Math.round(sVolt*1000000)/1000000).toFixed(6)
             p180_flag = true
-            col.enabled = true
+            left_col.enabled = true
             if (gp_flag && gn_flag && zp_flag && zn_flag && p180_flag && n180_flag)
                 js.sensor_param_calc()
         }
@@ -100,7 +100,7 @@ ApplicationWindow {
             n180_value = sVolt;
             n180.display = (Math.round(sVolt*1000000)/1000000).toFixed(6)
             n180_flag = true
-            col.enabled = true
+            left_col.enabled = true
             if (gp_flag && gn_flag && zp_flag && zn_flag && p180_flag && n180_flag)
                 js.sensor_param_calc()
         }
@@ -109,11 +109,11 @@ ApplicationWindow {
         }
         onP1_captured: {
             calibTab.captured_data1 = (Math.round(sVolt*1000000)/1000000).toFixed(6)
-            col.enabled = true
+            left_col.enabled = true
         }
         onP2_captured: {
             calibTab.captured_data2 = (Math.round(sVolt*1000000)/1000000).toFixed(6)
-            col.enabled = true
+            left_col.enabled = true
         }
         onDate_time_ready: {
             date_time.text =  DateTime;
@@ -135,7 +135,7 @@ ApplicationWindow {
             parameterTab.textButton3 = "Over Shoot\n" + (Math.round(over_shoot*1000000)/1000000).toFixed(6)
             dynamic_clicked = false
             paramTab.enabled = true
-            col.enabled = true
+            left_col.enabled = true
         }
         onCutoff_ready: {
             applicationWindow.cutoff_freq = (Math.round(cutof*1000000)/1000000).toFixed(6)
@@ -146,7 +146,7 @@ ApplicationWindow {
                 bridge.start_over_shoot_calc()
             }
             paramTab.enabled = true
-            col.enabled = true
+            left_col.enabled = true
             console.log("/////////// onCutoff_ready finished.")
         }
         onNaturalfreq_ready: {
@@ -157,7 +157,7 @@ ApplicationWindow {
                 bridge.cuttoff_freq_calc()
             }
             paramTab.enabled = true
-            col.enabled = true
+            left_col.enabled = true
         }
         onSet_progress_bar: {
             progressBar.value = percent
@@ -379,7 +379,7 @@ ApplicationWindow {
     }
 
     Column {
-        id: col
+        id: left_col
         width: 229
         height: 690
         anchors.top: parent.top
@@ -397,8 +397,8 @@ ApplicationWindow {
             display: "0.00"
             onPb_cliked: {
                 console.log("G+ Clicked")
+                left_col.enabled = false
                 bridge.pressed_button(0)
-                col.enabled = false
             }
 
         }
@@ -412,8 +412,9 @@ ApplicationWindow {
             display: "0.00"
             onPb_cliked: {
                 console.log("G- Clicked")
+                left_col.enabled = false
                 bridge.pressed_button(1)
-                col.enabled = false
+
             }
 
 
@@ -428,8 +429,8 @@ ApplicationWindow {
             display: "0.00"
             onPb_cliked: {
                 console.log("0+ Clicked")
+                left_col.enabled = false
                 bridge.pressed_button(2)
-                col.enabled = false
             }
 
         }
@@ -443,8 +444,8 @@ ApplicationWindow {
             display: "0.00"
             onPb_cliked: {
                 console.log("0- Clicked")
+                left_col.enabled = false
                 bridge.pressed_button(3)
-                col.enabled = false
             }
 
         }
@@ -458,8 +459,8 @@ ApplicationWindow {
             display: "0.00"
             onPb_cliked: {
                 console.log("180+ Clicked")
+                left_col.enabled = false
                 bridge.pressed_button(4)
-                col.enabled = false
             }
 
         }
@@ -473,8 +474,8 @@ ApplicationWindow {
             display: "0.00"
             onPb_cliked: {
                 console.log("180- Clicked")
+                left_col.enabled = false
                 bridge.pressed_button(5)
-                col.enabled = false
             }
 
         }
@@ -489,10 +490,11 @@ ApplicationWindow {
             display: "0.00"
             onPb_cliked: {
                 console.log("Dynamic Clicked")
-                bridge.natural_freq_calc()
+                left_col.enabled = false
                 dynamic_clicked = true
                 paramTab.enabled = false
-                col.enabled = false
+                bridge.natural_freq_calc()
+
 
             }
 
@@ -549,7 +551,7 @@ ApplicationWindow {
                         radius: 10
                     }
             onClicked: {
-                col.enabled = true
+                left_col.enabled= true
                 bridge.static_real_time_stop()
             }
 
@@ -568,7 +570,7 @@ ApplicationWindow {
             onClicked:
             {
                 bridge.static_real_time_start()
-                col.enabled = false
+                left_col.enabled = false
             }
         }
         TabButton {
@@ -583,7 +585,7 @@ ApplicationWindow {
                         radius: 10
                     }
             onClicked: {
-                col.enabled = true
+                left_col.enabled = true
                 bridge.static_real_time_stop()
             }
         }
@@ -599,7 +601,7 @@ ApplicationWindow {
                         radius: 10
                     }
             onClicked: {
-                col.enabled = true
+                left_col.enabled = true
                 bridge.static_real_time_stop()
             }
         }
@@ -615,7 +617,7 @@ ApplicationWindow {
                         radius: 10
                     }
             onClicked: {
-                col.enabled = true
+                left_col.enabled = true
                 bridge.static_real_time_stop()
             }
         }
@@ -665,19 +667,19 @@ ApplicationWindow {
                     textButton2: "Cuttoff Freq\n--"
                     textButton3: "Over Shoot\n--"
                     onNaturalfreqClicked: {
-                        bridge.natural_freq_calc()
                         paramTab.enabled = false
-                        col.enabled = false
+                        left_col.enabled = false
+                        bridge.natural_freq_calc()
                     }
                     onCuttoffClicked: {
-                        bridge.cuttoff_freq_calc()
                         paramTab.enabled = false
-                        col.enabled = false
+                        left_col.enabled = false
+                        bridge.cuttoff_freq_calc()
                     }
                     onOvershootClicked: {
-                        bridge.start_over_shoot_calc()
                         paramTab.enabled = false
-                        col.enabled = false
+                        left_col.enabled = false
+                        bridge.start_over_shoot_calc()
                     }
 
                     Button {
@@ -884,13 +886,13 @@ ApplicationWindow {
                     captured_data1: "0.0"
                     onP1clicked: {
                         console.log("Point1 Calibration Tab Clicked")
-                        bridge.pressed_button(6)
-                        col.enabled = false
+                        brid-ge.pressed_button(6)
+                        left_col.enabled = false
                     }
                     onP2clicked: {
                         console.log("Point2 Calibration Tab Clicked")
                         bridge.pressed_button(7)
-                        col.enabled = false
+                        left_col.enabled = false
                     }
                     onCalculate: {
 //                        console.log("Read text file: ", files.read_Params())

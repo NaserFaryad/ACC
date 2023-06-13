@@ -354,10 +354,10 @@ void PiGPIO::run()
              }
         else if(read_flag)
         {
-            ret = PiGPIO::AD7706_Init();
-            if (ret < 0) {
-                emit error_occured("PiGPIO Thread: AD7706_Init func, error code="+QString::number(ret));
-            }
+//            ret = PiGPIO::AD7706_Init();
+//            if (ret < 0) {
+//                emit error_occured("PiGPIO Thread: AD7706_Init func, error code="+QString::number(ret));
+//            }
             float temp;
             QVariantList current_temp;
             QVariantList current;
@@ -365,7 +365,7 @@ void PiGPIO::run()
             current = PiGPIO::read_current();
             current_temp.append(current[0]);
             current_temp.append(current[1]);
-            qInfo() << "Current: " << current[0]  << " , " << current[1] << " Temp: " << temp;
+//            qInfo() << "Current: " << current[0]  << " , " << current[1] << " Temp: " << temp;
             current_temp.append(temp);
             emit print_current(current_temp);
 //            const QMutexLocker locker(&m_mutex);
