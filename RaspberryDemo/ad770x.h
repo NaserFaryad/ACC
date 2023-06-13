@@ -73,8 +73,8 @@ extern "C" {
 #define  GAIN_64   0x6
 #define  GAIN_128  0x7
 
-#define  UNIPOLAR  0x0
-#define  BIPOLAR   0x1
+#define  UNIPOLAR  0x1
+#define  BIPOLAR   0x0
 
 #define  CLK_DIV_1  0x0
 #define  CLK_DIV_2  0x1
@@ -89,7 +89,7 @@ void writeClockRegister(spi_device *spi_dev, uint8_t CLKDIS, uint8_t CLKDIV, uin
 void writeSetupRegister(spi_device *spi_dev, uint8_t operationMode, uint8_t gain, uint8_t unipolar, uint8_t buffered, uint8_t fsync);
 int readADResultDouble(spi_device *spi_dev, double *result,uint8_t channel, float refOffset, double VRef, uint8_t polarity, int Gain);
 void ad7706Reset(spi_device *spi_dev);
-int32_t dataReady(spi_device *spi_dev, uint8_t channel, int32_t timeout);
+int32_t dataReady(spi_device *spi_dev, uint8_t channel);
 void ad7706InitDefaultParams(spi_device *spi_dev, uint8_t channel);
 void ad7706Init(spi_device *spi_dev, uint8_t channel, uint8_t clkDivider, uint8_t polarity, uint8_t gain, uint8_t updRate);
 

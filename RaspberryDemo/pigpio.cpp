@@ -93,8 +93,8 @@ int PiGPIO::AD7706_Init()
     if (ret < 0)
         return AUX_SPI_INIT_ERROR;
     ad7706Reset(ad770x_spi_dev);
-    ad7706Init(ad770x_spi_dev, CHN_AIN1, CLK_DIV_1, UNIPOLAR, GAIN_1, UPDATE_RATE_50);
     ad7706Init(ad770x_spi_dev, CHN_AIN2, CLK_DIV_1, UNIPOLAR, GAIN_1, UPDATE_RATE_50);
+    ad7706Init(ad770x_spi_dev, CHN_AIN1, CLK_DIV_1, UNIPOLAR, GAIN_1, UPDATE_RATE_50);
     return 0;
 }
 
@@ -217,7 +217,7 @@ QVariantList PiGPIO::read_current()
         }
         sum_ch2 += result2;
     }
-    qInfo() << " ADC RAW VALUEs: " << sum_ch1 << ", " << sum_ch2;
+//    qInfo() << " ADC RAW VALUEs: " << sum_ch1 << ", " << sum_ch2;
     avg_ch1 = sum_ch1 / i;
     avg_ch2 = sum_ch2 / i;
     double opamp_gain = 5.6;
@@ -274,7 +274,8 @@ float PiGPIO::read_temperature()
 void PiGPIO::run()
 {
     qInfo() << "<<<<<<<<<<  RUN Loop Started  >>>>>>>>>>";
-    int ret = PiGPIO::Square_Init();
+    int ret;
+    ret = PiGPIO::Square_Init();
     if (ret < 0)
         emit error_occured("PiGPIO Thread: Square_Init func, error code="+QString::number(ret));
     wave_mode = SQUARE;
@@ -282,10 +283,10 @@ void PiGPIO::run()
     if (ret < 0) {
         emit error_occured("PiGPIO Thread: AD7706_Init func, error code="+QString::number(ret));
     }
-//    ret = PiGPIO::max31865_Init();
-//    if (ret < 0) {
-//        emit error_occured("PiGPIO Thread: max31865_Init func, error code="+QString::number(MAX31865_INIT_ERROR));
-//    }
+    ret = PiGPIO::max31865_Init();
+    if (ret < 0) {
+        emit error_occured("PiGPIO Thread: max31865_Init func, error code="+QString::number(MAX31865_INIT_ERROR));
+    }
 
     while(true)
     {
@@ -305,9 +306,9 @@ void PiGPIO::run()
                 wave_mode = SIN;
             }
             else {
-                int ret = Aux_Spi_Init(&ad9833_dev->spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
-//                if (ret < 0) {
-//                    return -1;
+                ret = Aux_Spi_Init(&ad9833_dev->spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
+                if (ret < 0)
+                    emit error_occured("PiGPIO Thread: run loop, error code="+QString::number(AUX_SPI_INIT_ERROR));
                 }
             qInfo() << "#########Sin Generator, Frequency= " << sin_freq;
             ad9833_set_freq(ad9833_dev, 0, sin_freq);
@@ -315,9 +316,12 @@ void PiGPIO::run()
             ad9833_select_freq_reg(ad9833_dev, 0);
             ad9833_select_phase_reg(ad9833_dev, 0);
             sin_gen_flag = false;
-            int ret = Aux_Spi_Init(&max31865_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS2);
-            ret = Aux_Spi_Init(&ad770x_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS_NONE);
-//            if (ret<0) return ret;
+            ret = Aux_Spi_Init(&max31865_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS2);
+            if (ret < 0)
+                emit error_occured("PiGPIO Thread: run loop, error code="+QString::number(AUX_SPI_INIT_ERROR));
+            ret = Aux_Spi_Init(&ad770x_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS1);
+            if (ret < 0)
+                emit error_occured("PiGPIO Thread: run loop, error code="+QString::number(AUX_SPI_INIT_ERROR));
         }
         else if(sqr_gen_flag)
         {
@@ -331,10 +335,9 @@ void PiGPIO::run()
 
             }
             else {
-                int ret = Aux_Spi_Init(&ad9833_dev->spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
-//                if (ret < 0) {
-//                    return -1;
-//                }
+                ret = Aux_Spi_Init(&ad9833_dev->spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
+                if (ret < 0)
+                    emit error_occured("PiGPIO Thread: run loop, error code="+QString::number(AUX_SPI_INIT_ERROR));
             }
             qInfo() << "#########Sqr Generator, Frequency= " << sqr_freq;
             ad9833_set_freq(ad9833_dev, 0, sqr_freq);
@@ -342,17 +345,23 @@ void PiGPIO::run()
             ad9833_select_freq_reg(ad9833_dev, 0);
             ad9833_select_phase_reg(ad9833_dev, 0);
             sqr_gen_flag = false;
-            int ret = Aux_Spi_Init(&max31865_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS2);
-            ret = Aux_Spi_Init(&ad770x_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS_NONE);
-//            if (ret<0) return ret;
-
-        }
+            ret = Aux_Spi_Init(&max31865_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS2);
+            if (ret < 0)
+                emit error_occured("PiGPIO Thread: run loop, error code="+QString::number(AUX_SPI_INIT_ERROR));
+            ret = Aux_Spi_Init(&ad770x_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS1);
+            if (ret < 0)
+                emit error_occured("PiGPIO Thread: run loop, error code="+QString::number(AUX_SPI_INIT_ERROR));
+             }
         else if(read_flag)
         {
+            ret = PiGPIO::AD7706_Init();
+            if (ret < 0) {
+                emit error_occured("PiGPIO Thread: AD7706_Init func, error code="+QString::number(ret));
+            }
             float temp;
             QVariantList current_temp;
             QVariantList current;
-//            temp = PiGPIO::read_temperature();
+            temp = PiGPIO::read_temperature();
             current = PiGPIO::read_current();
             current_temp.append(current[0]);
             current_temp.append(current[1]);
