@@ -281,6 +281,7 @@ void Worker::quit()
 {
     qInfo() << this << "Quitting" << QThread::currentThread();
     m_timer->stop();
+    m_producer = false;
 }
 
 
@@ -563,6 +564,7 @@ void Worker::static_real_time()
     if(m_producer == false) {
 
         quit();
+        return;
     }
 
     int32_t  adc_data = 0;

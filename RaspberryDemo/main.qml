@@ -9,7 +9,7 @@ import QtGraphicalEffects 1.15
 
 ApplicationWindow {
     id: applicationWindow
-//    flags: Qt.FramelessWindowHint
+    flags: Qt.FramelessWindowHint
     width: 1280
     height: 800
     visible: true
@@ -41,6 +41,7 @@ ApplicationWindow {
     property string over_shoot: ""
     property bool dynamic_clicked: false
     property string export_xlsx_path: ""
+    property bool temp_error_flag: false;
 
 
 //    LinearGradient {
@@ -126,9 +127,13 @@ ApplicationWindow {
 
         }
         onPrint_current_temp: {
-            sensCurrentP.indicText = (Math.round(current_temp[0]*10000)/10).toFixed(1);
-            sensCurrentN.indicText = (Math.round(current_temp[1]*10000)/10).toFixed(1);
-             sensTemp.indicText = (Math.round(current_temp[2]*10000)/10000).toFixed(1);
+            sensCurrentP.indicText = (Math.round(current_temp[0]*10000)/10).toFixed(1) + " mA";
+            sensCurrentN.indicText = (Math.round(current_temp[1]*10000)/10).toFixed(1) + " mA";
+            if (current_temp[2] > -500) // error was not occured
+            {
+                sensTemp.indicText = (Math.round(current_temp[2]*10000)/10000).toFixed(1) + " °C";
+                temp_error_flag = false
+            }
         }
         onOvershoot_ready: {
             applicationWindow.over_shoot = (Math.round(over_shoot*1000000)/1000000).toFixed(6)
@@ -161,6 +166,15 @@ ApplicationWindow {
         }
         onSet_progress_bar: {
             progressBar.value = percent
+        }
+        onTemperature_fault_notice: {
+            if(!temp_error_flag)
+            {
+                temp_error_flag = true
+                errorDialog.detailedText = msg
+                errorDialog.open()
+                sensTemp.indicText = "Failed!"
+            }
         }
         onError_occured: {
             errorDialog.detailedText = msg
@@ -507,6 +521,7 @@ ApplicationWindow {
         id: sensCurrentP
         labelText: "Current [+15]"
         labelSize: 14
+        textSize: 18
         width: 250
         height: 50
         x: 25
@@ -518,6 +533,7 @@ ApplicationWindow {
         id: sensTemp
         labelText: "Temperature"
         labelSize: 14
+        textSize: 18
         width: 250
         height: 50
         x: 971
@@ -998,6 +1014,7 @@ ApplicationWindow {
         y: 30
         width: 250
         height: 50
+        textSize: 18
         anchors.horizontalCenter: parent.horizontalCenter
         labelText: "Current [-15]"
         labelSize: 14

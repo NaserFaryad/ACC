@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
     // Print error Connection
     QObject::connect(&adc,&Worker::error_occured,&bridge,&Bridge::print_error, Qt::QueuedConnection);
     QObject::connect(&singen,&PiGPIO::error_occured,&bridge,&Bridge::print_error, Qt::QueuedConnection);
+    QObject::connect(&singen,&PiGPIO::temperature_fault_notice,&bridge,&Bridge::temperature_fault, Qt::QueuedConnection);
 
     // Progress bar connection
     QObject::connect(&adc,&Worker::set_progress_bar,&bridge,&Bridge::progress_bar_value, Qt::QueuedConnection);

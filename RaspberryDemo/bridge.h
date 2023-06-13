@@ -56,6 +56,7 @@ signals:
     void naturalfreq_ready(double natural_freq);
     void set_progress_bar(int percent);
     void start_internal_calibration();
+    void temperature_fault_notice(QString msg);
 
 public slots:
     void pressed_button(int value);
@@ -78,6 +79,7 @@ public slots:
     void progress_bar_value(int percent);
     void print_error(QString msg);
     void internal_calibration();
+    void temperature_fault(QString msg);
 private:
     int button_name;
     file_manager files;

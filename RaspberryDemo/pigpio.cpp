@@ -242,31 +242,32 @@ float PiGPIO::read_temperature()
    if (fault) {
        emit temperature_fault_notice("Fault " + fault);
    if (fault & MAX31865_FAULT_HIGHTHRESH) {
-           qInfo() << "PiGPIO Thread: read_temperature func, RTD High Threshold\n";
-           emit error_occured("PiGPIO Thread: read_temperature func,RTD High Threshold\n");
+//           qInfo() << "PiGPIO Thread: read_temperature func, RTD High Threshold\n";
+           emit temperature_fault_notice("PiGPIO Thread: read_temperature func,RTD High Threshold\n");
        }
    if (fault & MAX31865_FAULT_LOWTHRESH) {
-           qInfo() << "PiGPIO Thread: read_temperature func,RTD Low Threshold\n";
-           emit error_occured("PiGPIO Thread: read_temperature func,RTD Low Threshold\n");
+//           qInfo() << "PiGPIO Thread: read_temperature func,RTD Low Threshold\n";
+           emit temperature_fault_notice("PiGPIO Thread: read_temperature func,RTD Low Threshold\n");
        }
    if (fault & MAX31865_FAULT_REFINLOW) {
-           qInfo() << "PiGPIO Thread: read_temperature func, REFIN- > 0.85 x Bias\n";
-           emit error_occured("PiGPIO Thread: read_temperature func,REFIN- > 0.85 x Bias\n");
+//           qInfo() << "PiGPIO Thread: read_temperature func, REFIN- > 0.85 x Bias\n";
+           emit temperature_fault_notice("PiGPIO Thread: read_temperature func,REFIN- > 0.85 x Bias\n");
        }
    if (fault & MAX31865_FAULT_REFINHIGH) {
-           qInfo() << "PiGPIO Thread: read_temperature func, REFIN- < 0.85 x Bias - FORCE- open\n";
-           emit error_occured("PiGPIO Thread: read_temperature func, REFIN- < 0.85 x Bias - FORCE- open\n");
+//           qInfo() << "PiGPIO Thread: read_temperature func, REFIN- < 0.85 x Bias - FORCE- open\n";
+           emit temperature_fault_notice("PiGPIO Thread: read_temperature func, REFIN- < 0.85 x Bias - FORCE- open\n");
        }
    if (fault & MAX31865_FAULT_RTDINLOW) {
-           qInfo() << "PiGPIO Thread: read_temperature func, RTDIN- < 0.85 x Bias - FORCE- open\n";
-           emit error_occured("PiGPIO Thread: read_temperature func, RTDIN- < 0.85 x Bias - FORCE- open\n");
+//           qInfo() << "PiGPIO Thread: read_temperature func, RTDIN- < 0.85 x Bias - FORCE- open\n";
+           emit temperature_fault_notice("PiGPIO Thread: read_temperature func, RTDIN- < 0.85 x Bias - FORCE- open\n");
        }
    if (fault & MAX31865_FAULT_OVUV) {
-           qInfo() << "PiGPIO Thread: read_temperature func, Under/Over voltage\n";
-           emit error_occured("PiGPIO Thread: read_temperature func, Under/Over voltage\n");
+//           qInfo() << "PiGPIO Thread: read_temperature func, Under/Over voltage\n";
+           emit temperature_fault_notice("PiGPIO Thread: read_temperature func, Under/Over voltage\n");
        }
 
        max31865_clear_fault(max31865_dev);
+       return -500;
    }
    return temp;
 }

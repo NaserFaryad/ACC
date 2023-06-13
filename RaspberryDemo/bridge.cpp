@@ -159,4 +159,9 @@ void Bridge::internal_calibration()
     emit start_internal_calibration();
 }
 
+void Bridge::temperature_fault(QString msg)
+{
+    emit temperature_fault_notice(msg);
+}
+
 
