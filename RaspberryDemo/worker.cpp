@@ -8,6 +8,13 @@ Worker::Worker(QObject *parent) : QObject(parent)
     m_count = 0;
     adc_offset = 8388608;
     signal_status = false;
+    if (!bcm2835_init())
+    {
+        emit error_occured("Worker Thread: bcm2835_init failed. Are you running as root?");
+    }
+    /* GPIO Init*/
+    bcm2835_gpio_fsel(DYN_STA_SEL_PIN   , BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_write(DYN_STA_SEL_PIN, LOW);
 
 }
 
