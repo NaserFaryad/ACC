@@ -7,7 +7,9 @@ Worker::Worker(QObject *parent) : QObject(parent)
     m_producer = false;
     m_count = 0;
     adc_offset = 8388608;
-    signal_status = false;
+//    m_mutex->lock();
+//    *signal_status = 0;
+//    m_mutex->unlock();
 
 }
 
@@ -263,6 +265,16 @@ int32_t Worker::capture_square()
 
 }
 
+void Worker::setMutex(QMutex *newMutex)
+{
+    m_mutex = newMutex;
+}
+
+void Worker::set_signal_status(bool *newStatus)
+{
+    signal_status = newStatus;
+}
+
 
 void Worker::static_real_time_start()
 {
@@ -359,7 +371,9 @@ void Worker::read_static_voltage(QVariant button_name)
 void Worker::dynamic_test(int freq, int wave)
 {
 //    emit timer_stop();
-    signal_status = false;
+    m_mutex->lock();
+    *signal_status = false;
+    m_mutex->unlock();
     qInfo() << "=======================================================================================";
     qInfo() << "Worker: dynamic test freq: " << freq << " wave: " << wave;
     if (wave == SQUARE)
@@ -367,7 +381,8 @@ void Worker::dynamic_test(int freq, int wave)
     else if(wave == SIN)
         emit start_sinusoid_gen(freq);
     int time_out = 50;
-    while(signal_status == false)
+    QMutexLocker locker(m_mutex);
+    while( *signal_status == false)
     {
         time_out--;
         bcm2835_delay(1);
@@ -580,7 +595,7 @@ void Worker::internal_calibration()
 bool Worker::signal_is_ready()
 {
     qInfo() << ">> SINAL GENERATED";
-    signal_status = true;
+//    *signal_status = true;
 }
 
 

@@ -52,6 +52,8 @@ public:
     int Square_Init();
     int AD7706_Init();
     int max31865_Init();
+    void setMutex(QMutex *newMutex);
+    void set_signal_status(bool *newStatus);
 
 signals:
     void notice(QVariant data);
@@ -59,6 +61,7 @@ signals:
     void temperature_fault_notice(QString message);
     void error_occured(QString msg);
     void signal_generated();
+
 
 private slots:
 
@@ -78,11 +81,13 @@ public slots:
 private:
     void run();
     int wave_mode;
-    mutable QMutex m_mutex;
+    QMutex m_mutex;
+    QMutex *g_mutex;
     bool read_flag;
     bool warning_toggle;
     bool sin_gen_flag;
     bool sqr_gen_flag;
+    bool *signal_status;
     int sin_freq;
     int sqr_freq;
     QTimer m_timer;

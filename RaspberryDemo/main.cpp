@@ -9,6 +9,8 @@
 #include "bridge.h"
 #include <QThread>
 #include "file_manager.h"
+#include <QMutex>
+#include <QMutexLocker>
 
 int main(int argc, char *argv[])
 {
@@ -19,15 +21,20 @@ int main(int argc, char *argv[])
     // the application class
     QGuiApplication app(argc, argv);
 
+    bool signal_gen_status;
+    QMutex g_mutex;
     // Threading
     QThread adcThread;
     Worker adc;
-
-//    QThread singenThread;
     PiGPIO singen;
-//    auto singen = new PiGPIO;
-
     Bridge bridge;
+
+    singen.setMutex(&g_mutex);
+    singen.set_signal_status(&signal_gen_status);
+
+    adc.setMutex(&g_mutex);
+    adc.set_signal_status(&signal_gen_status);
+
     adc.moveToThread(&adcThread);
 //    singen.moveToThread(&singenThread);
 

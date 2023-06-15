@@ -10,6 +10,8 @@
 #include "main_adc.h"
 #include <QElapsedTimer>
 #include "bcm2835.h"
+#include <QMutex>
+#include <QMutexLocker>
 
 #define ADC2DOUBLE_BIPOLAR(X) (double) ((((double) X) - 8388608)*2.5) /(8388608)
 
@@ -63,6 +65,9 @@ public:
     int32_t cutt_off_freq_search(int start, int end, double value_3db, int loop_number);
     int32_t capture_dynamic();
     int32_t capture_square();
+    void setMutex(QMutex *newMutex);
+    void set_signal_status(bool *newStatus);
+
 
 signals:
     void finished();
@@ -99,9 +104,10 @@ public slots:
 private:
     QTimer *m_timer;
     QElapsedTimer e_timer;
+    QMutex *m_mutex;
     int adc_offset;
     bool m_producer;
-    bool signal_status; // true: ready, false: not generated
+    bool *signal_status; // true: ready, false: not generated
     int m_count;
     int adc_mode = -1;
     ad717x_dev *ad7175_device;
