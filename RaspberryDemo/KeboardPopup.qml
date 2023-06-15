@@ -14,7 +14,7 @@ Item {
         id: rectangle
         color: "#ffffff"
         anchors.fill: parent
-
+        radius: 10
         Grid {
             id: grid
             width: parent.width

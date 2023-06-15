@@ -85,10 +85,10 @@ int spidev_init(spi_device *sdev) {
         if (ret == -1)
                 return ret;
 
-        printf("spi mode: 0x%x\n", sdev->init->mode);
-        printf("bits per word: %u\n", sdev->init->bits);
-        printf("max speed: %u Hz (%u kHz)\n", sdev->init->speed, sdev->init->speed/1000);
-        printf("\n\n\n\n\n\n");
+//        printf("spi mode: 0x%x\n", sdev->init->mode);
+//        printf("bits per word: %u\n", sdev->init->bits);
+//        printf("max speed: %u Hz (%u kHz)\n", sdev->init->speed, sdev->init->speed/1000);
+//        printf("\n\n\n\n\n\n");
 
     sdev -> fd = fd;
 

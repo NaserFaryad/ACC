@@ -9,6 +9,7 @@
 #include <QVariant>
 #include "main_adc.h"
 #include <QElapsedTimer>
+#include "bcm2835.h"
 
 #define ADC2DOUBLE_BIPOLAR(X) (double) ((((double) X) - 8388608)*2.5) /(8388608)
 
@@ -48,6 +49,9 @@
 
 #define Os_max_acceptable   35
 
+/* GPIO Init*/
+#define DYN_STA_SEL_PIN 22
+
 class Worker : public QObject
 {
     Q_OBJECT
@@ -86,6 +90,7 @@ public slots:
     void cuttoff_freq_calc();
     void over_shoot_calc();
     void internal_calibration();
+    bool signal_is_ready();
 
 
 
@@ -96,6 +101,7 @@ private:
     QElapsedTimer e_timer;
     int adc_offset;
     bool m_producer;
+    bool signal_status; // true: ready, false: not generated
     int m_count;
     int adc_mode = -1;
     ad717x_dev *ad7175_device;

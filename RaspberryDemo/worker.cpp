@@ -1,13 +1,21 @@
 #include "worker.h"
 #include "ad717x.h"
 #include <QThread>
-
+#include "bcm2835.h"
 Worker::Worker(QObject *parent) : QObject(parent)
 {
     m_producer = false;
     m_count = 0;
     adc_offset = 8388608;
+    signal_status = false;
+    if (!bcm2835_init())
+    {
+        qInfo() << "bcm2835_init failed. Are you running as root??\n";
 
+    }
+    bcm2835_gpio_fsel(DYN_STA_SEL_PIN, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_write(DYN_STA_SEL_PIN , LOW);
+    bcm2835_delay(200);
 }
 
 
@@ -48,6 +56,7 @@ int Worker::ADC_Init(int type)
 
 int32_t Worker::natural_freq_search(int start, int end, double start_value, double end_value, int loop_number)
 {
+    qInfo() << "***natural_freq_search***";
     if((end - start) < NF_resolution)
         return end;
 
@@ -180,8 +189,8 @@ int32_t Worker::capture_dynamic()
                 qInfo() << "capture_dynamic: read ADC value failed. error code: " << ret;
                 return ret;
             }
-            if (Value & 0x800000)
-                Value |= 0xFF000000;
+//            if (Value & 0x800000)
+//                Value |= 0xFF000000;
             if(Value < min_data)
                min_data = Value;
             if(Value > max_data)
@@ -196,6 +205,7 @@ int32_t Worker::capture_dynamic()
         final_max = max_sum / sample_number;
         range = int32_t(final_max - final_min);
     }
+    qInfo() << "capture_dynamic, range=" << range << "min=" << final_min << "max= " << final_max;
     return range;
 
 }
@@ -237,8 +247,8 @@ int32_t Worker::capture_square()
             qInfo() << "capture_square: read ADC value failed. error code: " << ret;
             i = sample_number;
         }
-        if (Value & 0x800000)
-            Value |= 0xFF000000;
+//        if (Value & 0x800000)
+//            Value |= 0xFF000000;
 
         if(Value > 0){
             max_sum = max_sum + Value;
@@ -356,11 +366,25 @@ void Worker::read_static_voltage(QVariant button_name)
 void Worker::dynamic_test(int freq, int wave)
 {
 //    emit timer_stop();
+    signal_status = false;
+    qInfo() << "=======================================================================================";
     qInfo() << "Worker: dynamic test freq: " << freq << " wave: " << wave;
     if (wave == SQUARE)
         emit start_square_gen(freq);
     else if(wave == SIN)
         emit start_sinusoid_gen(freq);
+    int time_out = 50;
+    while(signal_status == false)
+    {
+        time_out--;
+        bcm2835_delay(1);
+        if (time_out == 0)
+        {
+
+            qInfo() << ">>dynamic_test: TIMEOUT ERROR!!!!!";
+            break;
+        }
+    }
     int ret = Worker::ADC_Init(DYNAMIC_MODE);
     if (ret < 0) {
         emit error_occured("Worker Thread: dynamic_test, ADC_Init, error code="+QString::number(ret));
@@ -398,6 +422,7 @@ void Worker::dynamic_test(int freq, int wave)
             /* Read ADC data and write on Value*/
 
             int ret = Dynamic_Read(ad7175_device, &Value);
+
             if (ret < 0)
             {
                 emit error_occured("Worker Thread: dynamic_test, Dynamic_Read, error code="+QString::number(ret));
@@ -410,6 +435,7 @@ void Worker::dynamic_test(int freq, int wave)
             if(Value > max_data)
                 max_data = Value;
         }
+        qInfo() << "RAW Value: " << min_data;
         min_sum = min_sum + min_data;
         max_sum = max_sum + max_data;
     }
@@ -417,8 +443,10 @@ void Worker::dynamic_test(int freq, int wave)
     if(sample_number > 0){
         final_min = min_sum / sample_number;
         final_max = max_sum / sample_number;
-        final_min = ADC2DOUBLE_BIPOLAR(final_min) ;
-        final_max =  ADC2DOUBLE_BIPOLAR(final_max) ;
+        qInfo() << "RAW Final min: "<< final_min << "Final max" << final_max << "range: " << final_range;
+        final_min = (double) ((((double) final_min) - 8388608)*2.5) /(8388608) ;
+        final_max = (double) ((((double) final_max) - 8388608)*2.5) /(8388608) ;
+//        final_max =  ADC2DOUBLE_BIPOLAR() ;
         final_range =  final_max - final_min;
         final_rms = final_range*0.7071068;
         QVariantList data;
@@ -431,6 +459,7 @@ void Worker::dynamic_test(int freq, int wave)
 //    emit timer_start();
 //    return range;
  qInfo() << "Final min: "<< final_min << "Final max" << final_max << "range: " << final_range;
+
 }
 
 void Worker::natural_freq_calc()
@@ -444,7 +473,7 @@ void Worker::natural_freq_calc()
     emit start_sinusoid_gen(nf_freq_start);
     bcm2835_delay(1);
     start_value= Worker::capture_dynamic();
-
+    bcm2835_delay(1);
     emit start_sinusoid_gen(nf_freq_end);
     bcm2835_delay(1);
     end_value = Worker::capture_dynamic();
@@ -553,6 +582,12 @@ void Worker::internal_calibration()
     }
     qInfo() << "Offset = " << adc_offset;
 
+}
+
+bool Worker::signal_is_ready()
+{
+    qInfo() << ">> SINAL GENERATED";
+    signal_status = true;
 }
 
 

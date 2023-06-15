@@ -210,12 +210,12 @@ int Static_Init(ad717x_dev **device)
         /* RELAY K2 */
         bcm2835_gpio_fsel(RELAY_K2_GPIO, BCM2835_GPIO_FSEL_OUTP);
         bcm2835_gpio_write(RELAY_K2_GPIO, LOW);
-        bcm2835_delay(1);
+        bcm2835_delay(200);
 
         /* RELAY K3 */
         bcm2835_gpio_fsel(RELAY_K3_GPIO, BCM2835_GPIO_FSEL_OUTP);
         bcm2835_gpio_write(RELAY_K3_GPIO, LOW);
-        bcm2835_delay(1);
+        bcm2835_delay(200);
 
         /* Initialize AD7175-2 ADC */
         ret = Initialize_Device(&dev, ad7175_2_init, INITIALIZE_MAX_RETRY);
@@ -282,10 +282,16 @@ int Static_Read(ad717x_dev *dev, int32_t *adc_data)
         int32_t adc_data_temp = 0;
         int32_t adc_data_sum = 0;
         int counter = 0;
+        int err_cnt = 0;
         while(counter < 5)
         {
             ret = ad717x_single_read(dev, CHANNEL_ID_0, &adc_data_temp);
-            if (ret < 0) return AD717x_SINGLE_READ_ERROR;
+            if (ret < 0) {
+                err_cnt++;
+                if (err_cnt > 3)
+                    return AD717x_SINGLE_READ_ERROR;
+                continue;
+            }
             adc_data_sum += adc_data_temp;
             counter++;
         }
@@ -330,12 +336,12 @@ int Dynamic_Init(ad717x_dev **device)
        /* RELAY K2 */
        bcm2835_gpio_fsel(RELAY_K2_GPIO, BCM2835_GPIO_FSEL_OUTP);
        bcm2835_gpio_write(RELAY_K2_GPIO, HIGH);
-       bcm2835_delay(1);
+       bcm2835_delay(200);
 
        /* RELAY K3 */
        bcm2835_gpio_fsel(RELAY_K3_GPIO, BCM2835_GPIO_FSEL_OUTP);
        bcm2835_gpio_write(RELAY_K3_GPIO, LOW);
-       bcm2835_delay(1);
+       bcm2835_delay(200);
 
        ret = Initialize_Device(&dev, ad7175_2_init, INITIALIZE_MAX_RETRY);
        if (ret < 0) return ret;

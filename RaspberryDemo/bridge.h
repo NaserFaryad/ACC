@@ -6,7 +6,6 @@
 #include <QDebug>
 #include "file_manager.h"
 
-
 #define STATIC_MODE 0
 #define DYNAMIC_MODE 1
 #define GP 0
@@ -57,6 +56,7 @@ signals:
     void set_progress_bar(int percent);
     void start_internal_calibration();
     void temperature_fault_notice(QString msg);
+    void relays_power_off();
 
 public slots:
     void pressed_button(int value);
@@ -80,6 +80,8 @@ public slots:
     void print_error(QString msg);
     void internal_calibration();
     void temperature_fault(QString msg);
+    void system_power_off();
+
 private:
     int button_name;
     file_manager files;

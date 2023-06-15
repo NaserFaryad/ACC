@@ -115,3 +115,84 @@ GPIOWrite(int pin, int value)
     close(fd);
     return(0);
 }
+
+int relay_init()
+{
+    if (!bcm2835_init())
+    {
+        printf("bcm2835_init failed. Are you running as root??\n");
+        return -1;
+    }
+    /* GPIO Init*/
+    bcm2835_gpio_fsel(WARN_LED_PIN   , BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(SENSOR_OK_PIN  , BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(PWR_5V_OK_PIN  , BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(PWR_15V_OK_PIN , BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(SQR_SIN_SEL_PIN, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(PWR_15V_SW_PIN , BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_write(WARN_LED_PIN   , LOW);
+    bcm2835_gpio_write(SENSOR_OK_PIN  , LOW);
+    bcm2835_gpio_write(PWR_5V_OK_PIN  , LOW);
+    bcm2835_gpio_write(PWR_15V_OK_PIN , LOW);
+    bcm2835_gpio_write(SQR_SIN_SEL_PIN, LOW);
+    bcm2835_gpio_write(PWR_15V_SW_PIN , LOW);
+    bcm2835_delay(200);
+    return 0;
+}
+
+void sensor_ok_on()
+{
+    bcm2835_gpio_write(SENSOR_OK_PIN , HIGH);
+}
+
+void sensor_ok_off()
+{
+    bcm2835_gpio_write(SENSOR_OK_PIN , LOW);
+}
+
+void pwr_15v_ok_on()
+{
+    bcm2835_gpio_write(PWR_15V_OK_PIN , HIGH);
+}
+
+void pwr_15v_ok_off()
+{
+    bcm2835_gpio_write(PWR_15V_OK_PIN , LOW);
+}
+
+void toggle_warning(int ms_delay)
+{
+    bcm2835_gpio_write(WARN_LED_PIN , HIGH);
+    bcm2835_delay(ms_delay);
+    bcm2835_gpio_write(WARN_LED_PIN , LOW);
+}
+
+void pwr_5v_ok_on()
+{
+    bcm2835_gpio_write(PWR_5V_OK_PIN , HIGH);
+}
+
+void pwr_5v_ok_off()
+{
+    bcm2835_gpio_write(PWR_5V_OK_PIN , LOW);
+}
+
+void pwr_15v_on()
+{
+    bcm2835_gpio_write(PWR_15V_SW_PIN , HIGH);
+}
+
+void pwr_15v_off()
+{
+    bcm2835_gpio_write(PWR_15V_SW_PIN , LOW);
+}
+
+void relays_off()
+{
+    bcm2835_gpio_write(WARN_LED_PIN   , LOW);
+    bcm2835_gpio_write(SENSOR_OK_PIN  , LOW);
+    bcm2835_gpio_write(PWR_5V_OK_PIN  , LOW);
+    bcm2835_gpio_write(PWR_15V_OK_PIN , LOW);
+    bcm2835_gpio_write(SQR_SIN_SEL_PIN, LOW);
+    bcm2835_gpio_write(PWR_15V_SW_PIN , LOW);
+}

@@ -171,8 +171,8 @@ ApplicationWindow {
             if(!temp_error_flag)
             {
                 temp_error_flag = true
-                errorDialog.detailedText = msg
-                errorDialog.open()
+//                errorDialog.detailedText = msg
+//                errorDialog.open()
                 sensTemp.indicText = "Failed!"
             }
         }
@@ -550,7 +550,7 @@ ApplicationWindow {
         height: 50
         currentIndex: 0
         background: Rectangle {
-                color: "#f4d37c"
+                color: "#eee"
                 radius: 10
             }
         TabButton {
@@ -723,7 +723,15 @@ ApplicationWindow {
                                  GradientStop { position: 1.0; color: save.pressed ?"#0cebeb": "#02AAB0"}
                                         }
                         }
-                        onClicked: saveDialog.open()
+                        onClicked: {
+                            if(serialNum.text.length === 0)
+                            {
+                                errorDialog.text = "Please enter the sensor serial number"
+                                errorDialog.open()
+                            }
+                            else
+                                saveDialog.open()
+                        }
                     }
 
                     Button {
@@ -902,7 +910,7 @@ ApplicationWindow {
                     captured_data1: "0.0"
                     onP1clicked: {
                         console.log("Point1 Calibration Tab Clicked")
-                        brid-ge.pressed_button(6)
+                        bridge.pressed_button(6)
                         left_col.enabled = false
                     }
                     onP2clicked: {
@@ -911,18 +919,28 @@ ApplicationWindow {
                         left_col.enabled = false
                     }
                     onCalculate: {
-//                        console.log("Read text file: ", files.read_Params())
-                        // input arguman: x1, y1, x2, y2
-                        var calib_param= js.gain_offset_calib(calibTab.captured_data1, // x1
-                                                              calibTab.volt_meter1, //y1
-                                                              calibTab.captured_data2, //x2
-                                                              calibTab.volt_meter2) //y2
-                        console.log("Gain: ", calib_param.gain)
-                        console.log("Offset: ", calib_param.offset)
-                        gain = calib_param.gain
-                        offset = calib_param.offset
-                        calculate_m = (Math.round(calib_param.gain*1000000)/1000000).toFixed(6)
-                        calculate_d = (Math.round(calib_param.offset*1000000)/1000000).toFixed(6)
+                        if (calibTab.volt_meter1.length === 0 || calibTab.volt_meter2.length === 0)
+                        {
+                            errorDialog.text = "Please enter the voltmeter values!"
+                            errorDialog.open()
+
+                        }
+                        else
+                        {
+
+                            // input arguman: x1, y1, x2, y2
+                            var calib_param= js.gain_offset_calib(calibTab.captured_data1, // x1
+                                                                  calibTab.volt_meter1, //y1
+                                                                  calibTab.captured_data2, //x2
+                                                                  calibTab.volt_meter2) //y2
+                            console.log("Gain: ", calib_param.gain)
+                            console.log("Offset: ", calib_param.offset)
+                            gain = calib_param.gain
+                            offset = calib_param.offset
+                            calculate_m = (Math.round(calib_param.gain*1000000)/1000000).toFixed(6)
+                            calculate_d = (Math.round(calib_param.offset*1000000)/1000000).toFixed(6)
+                        }
+
                     }
                     onSave: {
                         console.log("Saving calibration params")
@@ -1046,6 +1064,18 @@ ApplicationWindow {
         onNo: console.log("didn't save")
     }
     MessageDialog {
+        id: pwrDialog
+        title: "Power Off"
+        icon: StandardIcon.Question
+        text: "Are you sure you want to power off the system?"
+        standardButtons: StandardButton.Yes | StandardButton.No
+        modality: Qt.WindowModal
+        onYes: {
+            bridge.system_power_off()
+        }
+        onNo: console.log("didn't save")
+    }
+    MessageDialog {
         id: errorDialog
         title: "Error"
         icon: StandardIcon.Critical
@@ -1089,9 +1119,41 @@ ApplicationWindow {
         onRejected: {
             console.log("Canceled")
             export_xlsx_path = ""
-//            Qt.quit()
+            //            Qt.quit()
         }
-    }
+   }
+
+   RoundButton {
+       id: pwrOff
+       x: 250
+       y: 725
+       width: 97
+       height: 50
+       radius: 19
+       text: "<font color=\"white\">Power Off</font>"
+       font.pointSize: 12
+       font.family: "Verdana"
+       onClicked: pwrDialog.open()
+       background: Rectangle {
+           width: parent.height
+           height: parent.width
+           anchors.centerIn: parent
+           color: parent.down ? "#fff" :
+                 (parent.hovered ? "#d6d6d6" : "#f6f6f6")
+           border.width: reset.activeFocus ? 2 : 1
+           border.color: "white"
+           radius: 10
+           rotation: 90
+
+           gradient: Gradient {
+               GradientStop { position: 0.0; color: exportFile.pressed ? "#FFAFBD" : "#F00000"}
+               GradientStop { position: 0.51; color: exportFile.pressed ?"#ffc3a0":"#F00000" }
+                GradientStop { position: 1.0; color: exportFile.pressed ?"#FFAFBD": "#DC281E"}
+                       }
+       }
+
+
+   }
 
 
 

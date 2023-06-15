@@ -12,8 +12,8 @@ Item {
     signal calibclicked()
     signal calculate()
     signal save()
-    property string volt_meter1: "0.00"
-    property string volt_meter2: "0.00"
+    property string volt_meter1: ""
+    property string volt_meter2: ""
     property string captured_data1: "0.00"
     property string captured_data2: "0.00"
     property string calculate_m: "0.00"

@@ -164,4 +164,10 @@ void Bridge::temperature_fault(QString msg)
     emit temperature_fault_notice(msg);
 }
 
+void Bridge::system_power_off()
+{
+    emit relays_power_off();
+    system("shutdown -P now");
+}
+
 

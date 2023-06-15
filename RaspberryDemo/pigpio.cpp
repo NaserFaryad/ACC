@@ -1,5 +1,6 @@
 #include "pigpio.h"
 #include <QThread>
+using namespace std;
 
 int value = 0;
 PiGPIO::PiGPIO(QObject *parent) : QThread(parent)
@@ -17,6 +18,9 @@ PiGPIO::PiGPIO(QObject *parent) : QThread(parent)
 
     sin_gen_flag = false;
     sqr_gen_flag = false;
+    warning_toggle = false;
+
+
 }
 
 
@@ -37,54 +41,67 @@ void PiGPIO::gpio_export(QString pinNum, QString pinDirc)
 
 int PiGPIO::Sinusoid_Init()
 {
-    int ret = 0;
-    spi_device *spi_dev;
-    struct ad9833_init_param init_param;
+    try {
+        int ret = 0;
+        spi_device *spi_dev;
+        struct ad9833_init_param init_param;
 
-    ret = Aux_Spi_Init(&spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
-    if (ret < 0)
-        return AUX_SPI_INIT_ERROR;
+        ret = Aux_Spi_Init(&spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
+        if (ret < 0)
+            return AUX_SPI_INIT_ERROR;
 
-    /* Set Relay ON */
-    /* RELAY K1 */
-    bcm2835_gpio_fsel(RELAY_K1_GPIO, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_gpio_write(RELAY_K1_GPIO, HIGH);  // in Square wave mode, the relay shoul be oOn
-    bcm2835_delay(1);
+        /* Set Relay ON */
+        /* RELAY K1 */
+        bcm2835_gpio_fsel(RELAY_K1_GPIO, BCM2835_GPIO_FSEL_OUTP);
+        bcm2835_gpio_write(RELAY_K1_GPIO, HIGH);  // in Square wave mode, the relay shoul be oOn
+        bcm2835_delay(1);
 
-    init_param.act_device = ID_AD9833;
-    init_param.spi_dev = spi_dev;
+        init_param.act_device = ID_AD9833;
+        init_param.spi_dev = spi_dev;
 
-    ret = ad9833_init(&ad9833_dev, init_param);
-    if (ret < 0) {  // TODO: FIX ERROR CODE
-        return AD9833_INIT_ERROR;
+        ret = ad9833_init(&ad9833_dev, init_param);
+        if (ret < 0) {  // TODO: FIX ERROR CODE
+            return AD9833_INIT_ERROR;
+        }
+
+        ad9833_out_mode(ad9833_dev, AD9833_OUT_SINUSOID);  // #TODO:
+        return 0;
+
+    } catch (const char* err) {
+        qInfo() << "PiGPIO Thread: Sinusoid_Init, catched an error!, " << err;
+        return SIN_INIT_ERROR;
     }
 
-    ad9833_out_mode(ad9833_dev, AD9833_OUT_SINUSOID);  // #TODO:
-    return 0;
 }
 
 int PiGPIO::Square_Init()
 {
-    int ret = 0;
-    spi_device *spi_dev;
-    struct ad9833_init_param init_param;
-    ret = Aux_Spi_Init(&spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
-    if (ret < 0)
-        return AUX_SPI_INIT_ERROR;
-    /* Set Relay OFF */
-    /* RELAY K1 */
-    bcm2835_gpio_fsel(RELAY_K1_GPIO, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_gpio_write(RELAY_K1_GPIO, LOW);  // in Square wave mode, the relay shoul be off
-    bcm2835_delay(1);
-    init_param.act_device = ID_AD9833;
-    init_param.spi_dev = spi_dev;
-    ret = ad9833_init(&ad9833_dev, init_param);
-    if (ret < 0) {  // TODO: FIX ERROR CODE
-        return AD9833_INIT_ERROR;
+    try {
+        int ret = 0;
+        spi_device *spi_dev;
+        struct ad9833_init_param init_param;
+        ret = Aux_Spi_Init(&spi_dev, 50000, SPI_MODE_2, 1, SPIDEV_AUX_SPI_CS0);
+        if (ret < 0)
+            return AUX_SPI_INIT_ERROR;
+        /* Set Relay OFF */
+        /* RELAY K1 */
+        bcm2835_gpio_fsel(RELAY_K1_GPIO, BCM2835_GPIO_FSEL_OUTP);
+        bcm2835_gpio_write(RELAY_K1_GPIO, LOW);  // in Square wave mode, the relay shoul be off
+        bcm2835_delay(1);
+        init_param.act_device = ID_AD9833;
+        init_param.spi_dev = spi_dev;
+        ret = ad9833_init(&ad9833_dev, init_param);
+        if (ret < 0) {  // TODO: FIX ERROR CODE
+            return AD9833_INIT_ERROR;
+        }
+        // TODO: Duty cycle should be checked!
+        ad9833_out_mode(ad9833_dev, AD9833_OUT_DAC_DATA_MSB);
+        return 0;
+    } catch (const char* err) {
+        qInfo() << "PiGPIO Thread: Square_Init, catched an error!, " << err;
+        return SQUARE_INIT_ERROR;
     }
-    // TODO: Duty cycle should be checked!
-    ad9833_out_mode(ad9833_dev, AD9833_OUT_DAC_DATA_MSB);
-    return 0;
+
 }
 
 int PiGPIO::AD7706_Init()
@@ -137,6 +154,8 @@ void PiGPIO::timeout()
     m_display = QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss");
     const QMutexLocker locker(&m_mutex);
     read_flag = true;
+    if(warning_toggle)
+        toggle_warning(40);
     emit notice(QVariant(m_display));
 }
 
@@ -173,7 +192,7 @@ void PiGPIO::gpio_low(QString pinNum)
 
 void PiGPIO::Sinusoid_Gen(int freq)
 {
-    const QMutexLocker locker(&m_mutex);
+//    const QMutexLocker locker(&m_mutex);
     sin_gen_flag = true;
     sin_freq = freq;
 }
@@ -272,10 +291,18 @@ float PiGPIO::read_temperature()
    return temp;
 }
 
+void PiGPIO::system_power_off()
+{
+    relays_off();
+}
+
+
 void PiGPIO::run()
 {
     qInfo() << "<<<<<<<<<<  RUN Loop Started  >>>>>>>>>>";
     int ret;
+//    relay_init();
+//    pwr_5v_ok_on();
     ret = PiGPIO::Square_Init();
     if (ret < 0)
         emit error_occured("PiGPIO Thread: Square_Init func, error code="+QString::number(ret));
@@ -317,6 +344,7 @@ void PiGPIO::run()
             ad9833_select_freq_reg(ad9833_dev, 0);
             ad9833_select_phase_reg(ad9833_dev, 0);
             sin_gen_flag = false;
+            emit signal_generated();
             ret = Aux_Spi_Init(&max31865_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS2);
             if (ret < 0)
                 emit error_occured("PiGPIO Thread: run loop, error code="+QString::number(AUX_SPI_INIT_ERROR));
@@ -366,6 +394,14 @@ void PiGPIO::run()
             current = PiGPIO::read_current();
             current_temp.append(current[0]);
             current_temp.append(current[1]);
+            if(current[1] > CURRENT_LIMIT || current[0] > CURRENT_LIMIT)
+                warning_toggle = true;
+            else
+                warning_toggle = false;
+            if(current[1] > CURRENT_THRESHOLD || current[0] > CURRENT_THRESHOLD)
+                sensor_ok_on();
+            else
+                sensor_ok_off();
 //            qInfo() << "Current: " << current[0]  << " , " << current[1] << " Temp: " << temp;
             current_temp.append(temp);
             emit print_current(current_temp);

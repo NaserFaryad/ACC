@@ -51,7 +51,8 @@ int main(int argc, char *argv[])
 
     // SigGen: Dynamic Test Connection
     QObject::connect(&bridge,&Bridge::start_dynamic_test,&adc,&Worker::dynamic_test, Qt::QueuedConnection);
-    QObject::connect(&adc,&Worker::start_sinusoid_gen,&singen,&PiGPIO::Sinusoid_Gen, Qt::QueuedConnection);
+    QObject::connect(&adc,&Worker::start_sinusoid_gen,&singen,&PiGPIO::Sinusoid_Gen);
+    QObject::connect(&singen,&PiGPIO::signal_generated,&adc,&Worker::signal_is_ready);
     QObject::connect(&adc,&Worker::start_square_gen,&singen,&PiGPIO::Square_Gen, Qt::QueuedConnection);
     QObject::connect(&adc,&Worker::dynamic_test_ready,&bridge,&Bridge::dynamic_test_values, Qt::QueuedConnection);
     QObject::connect(&bridge,&Bridge::start_natural_freq_calc,&adc,&Worker::natural_freq_calc, Qt::QueuedConnection);
@@ -62,6 +63,8 @@ int main(int argc, char *argv[])
     QObject::connect(&adc,&Worker::naturalfreq_ready, &bridge,&Bridge::naturalfreq, Qt::QueuedConnection);
     QObject::connect(&adc,&Worker::timer_stop,&singen,&PiGPIO::stop, Qt::QueuedConnection);
     QObject::connect(&adc,&Worker::timer_start,&singen,&PiGPIO::timer_start, Qt::QueuedConnection);
+
+//    QObject::connect(&bridge,&Bridge::relays_power_off,&singen,&PiGPIO::timer_start, Qt::QueuedConnection);
 
     // Temperature and Current sensor connection
     QObject::connect(&singen,&PiGPIO::print_current,&bridge,&Bridge::sensor_current_temp, Qt::QueuedConnection);

@@ -13,6 +13,7 @@
 #include "ad9833.h"
 #include "ad770x.h"
 #include "max31865.h"
+#include "file_gpio.h"
 
 #define RELAY_K1_GPIO 6
 #define RELAY_K2_GPIO 22
@@ -32,6 +33,13 @@
 #define MAX31865_INIT_ERROR         -2
 #define AD7706_READ_TIMEOUT_ERROR   -3
 #define AD9833_INIT_ERROR           -4
+#define SQUARE_INIT_ERROR           -5
+#define SIN_INIT_ERROR              -6
+
+/*current upper limit*/
+#define CURRENT_LIMIT       0.030 // 30 mA
+#define CURRENT_THRESHOLD   0.010 // 10 mA
+
 
 class PiGPIO : public QThread
 {
@@ -50,6 +58,7 @@ signals:
     void print_current(QVariantList current);
     void temperature_fault_notice(QString message);
     void error_occured(QString msg);
+    void signal_generated();
 
 private slots:
 
@@ -62,12 +71,16 @@ public slots:
     void Square_Gen(int freq);
     QVariantList read_current();
     float read_temperature();
+    void system_power_off();
+
+
 
 private:
     void run();
     int wave_mode;
     mutable QMutex m_mutex;
     bool read_flag;
+    bool warning_toggle;
     bool sin_gen_flag;
     bool sqr_gen_flag;
     int sin_freq;
