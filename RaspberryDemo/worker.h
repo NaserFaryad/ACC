@@ -67,6 +67,7 @@ public:
     int32_t capture_square();
     void setMutex(QMutex *newMutex);
     void set_signal_status(bool *newStatus);
+    void set_signal_status_false();
 
 
 signals:

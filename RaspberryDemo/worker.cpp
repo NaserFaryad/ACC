@@ -7,9 +7,6 @@ Worker::Worker(QObject *parent) : QObject(parent)
     m_producer = false;
     m_count = 0;
     adc_offset = 8388608;
-//    m_mutex->lock();
-//    *signal_status = 0;
-//    m_mutex->unlock();
 
 }
 
@@ -275,6 +272,13 @@ void Worker::set_signal_status(bool *newStatus)
     signal_status = newStatus;
 }
 
+void Worker::set_signal_status_false()
+{
+    m_mutex->lock();
+    *signal_status = false;
+    m_mutex->unlock();
+}
+
 
 void Worker::static_real_time_start()
 {
@@ -371,25 +375,21 @@ void Worker::read_static_voltage(QVariant button_name)
 void Worker::dynamic_test(int freq, int wave)
 {
 //    emit timer_stop();
-    m_mutex->lock();
-    *signal_status = false;
-    m_mutex->unlock();
-    qInfo() << "=======================================================================================";
+    set_signal_status_false();
+    qInfo() << "====================================================================================";
     qInfo() << "Worker: dynamic test freq: " << freq << " wave: " << wave;
     if (wave == SQUARE)
         emit start_square_gen(freq);
     else if(wave == SIN)
         emit start_sinusoid_gen(freq);
-    int time_out = 50;
-    QMutexLocker locker(m_mutex);
-    while( *signal_status == false)
+    int time_out = 1000;
+    while( Worker::signal_is_ready() == false)
     {
         time_out--;
         bcm2835_delay(1);
         if (time_out == 0)
         {
-
-            qInfo() << ">>dynamic_test: TIMEOUT ERROR!!!!!";
+            emit error_occured("Worker Thread: dynamic_test, signal_is_ready, time out error.");
             break;
         }
     }
@@ -594,8 +594,12 @@ void Worker::internal_calibration()
 
 bool Worker::signal_is_ready()
 {
-    qInfo() << ">> SINAL GENERATED";
-//    *signal_status = true;
+    bool ret;
+    m_mutex->lock();
+    ret = *signal_status;
+    m_mutex->unlock();
+
+    return ret;
 }
 
 

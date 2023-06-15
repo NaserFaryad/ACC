@@ -354,8 +354,10 @@ void PiGPIO::run()
             ad9833_select_freq_reg(ad9833_dev, 0);
             ad9833_select_phase_reg(ad9833_dev, 0);
             sin_gen_flag = false;
+            qInfo() << this->currentThread() << ": lock";
             g_mutex->lock();
             *signal_status = true;
+            qInfo() << this->currentThread() << ": unlock";
             g_mutex->unlock();
 //            emit signal_generated();
             ret = Aux_Spi_Init(&max31865_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS2);
