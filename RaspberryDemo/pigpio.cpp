@@ -301,8 +301,8 @@ void PiGPIO::run()
 {
     qInfo() << "<<<<<<<<<<  RUN Loop Started  >>>>>>>>>>";
     int ret;
-//    relay_init();
-//    pwr_5v_ok_on();
+    relay_init();
+    pwr_5v_ok_on();
     ret = PiGPIO::Square_Init();
     if (ret < 0)
         emit error_occured("PiGPIO Thread: Square_Init func, error code="+QString::number(ret));

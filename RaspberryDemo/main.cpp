@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     QObject::connect(&adc,&Worker::timer_stop,&singen,&PiGPIO::stop, Qt::QueuedConnection);
     QObject::connect(&adc,&Worker::timer_start,&singen,&PiGPIO::timer_start, Qt::QueuedConnection);
 
-//    QObject::connect(&bridge,&Bridge::relays_power_off,&singen,&PiGPIO::timer_start, Qt::QueuedConnection);
+    QObject::connect(&bridge,&Bridge::relay_power_off,&singen,&PiGPIO::system_power_off);
 
     // Temperature and Current sensor connection
     QObject::connect(&singen,&PiGPIO::print_current,&bridge,&Bridge::sensor_current_temp, Qt::QueuedConnection);

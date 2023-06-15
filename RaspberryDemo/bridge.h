@@ -56,7 +56,7 @@ signals:
     void set_progress_bar(int percent);
     void start_internal_calibration();
     void temperature_fault_notice(QString msg);
-    void relays_power_off();
+    void relay_power_off();
 
 public slots:
     void pressed_button(int value);

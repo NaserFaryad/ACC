@@ -1,21 +1,14 @@
 #include "worker.h"
 #include "ad717x.h"
 #include <QThread>
-#include "bcm2835.h"
+
 Worker::Worker(QObject *parent) : QObject(parent)
 {
     m_producer = false;
     m_count = 0;
     adc_offset = 8388608;
     signal_status = false;
-    if (!bcm2835_init())
-    {
-        qInfo() << "bcm2835_init failed. Are you running as root??\n";
 
-    }
-    bcm2835_gpio_fsel(DYN_STA_SEL_PIN, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_gpio_write(DYN_STA_SEL_PIN , LOW);
-    bcm2835_delay(200);
 }
 
 
