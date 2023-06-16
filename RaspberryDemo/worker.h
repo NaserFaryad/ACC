@@ -68,6 +68,7 @@ public:
     void setMutex(QMutex *newMutex);
     void set_signal_status(bool *newStatus);
     void set_signal_status_false();
+    void wait_ready_generator();
 
 
 signals:

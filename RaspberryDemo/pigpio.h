@@ -60,7 +60,6 @@ signals:
     void print_current(QVariantList current);
     void temperature_fault_notice(QString message);
     void error_occured(QString msg);
-    void signal_generated();
 
 
 private slots:
