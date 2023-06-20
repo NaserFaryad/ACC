@@ -31,8 +31,8 @@
 #define SIN    1
 
 #define dynamic_sample_number   100
-#define dynamic_sample_length   100
-#define square_loop_number  2000
+#define dynamic_sample_length   300
+#define square_loop_number  10000
 #define nf_freq_start   300
 #define nf_freq_end     700
 #define sf_freq_start   500
