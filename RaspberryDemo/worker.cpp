@@ -49,6 +49,7 @@ int Worker::ADC_Init(int type)
 int32_t Worker::natural_freq_search(int start, int end, double start_value, double end_value, int loop_number)
 {
     qInfo() << "***natural_freq_search***";
+
     if((end - start) < NF_resolution)
         return end;
 
@@ -65,17 +66,19 @@ int32_t Worker::natural_freq_search(int start, int end, double start_value, doub
     index[4] = end;
 
     data[0] = start_value;
-
+    set_signal_status_false();
     emit start_sinusoid_gen(index[1]);
-    bcm2835_delayMicroseconds(20);
+    wait_ready_generator();
     data[1] = Worker::capture_dynamic();
 
+    set_signal_status_false();
     emit start_sinusoid_gen(index[2]);
-    bcm2835_delayMicroseconds(20);
+    wait_ready_generator();
     data[2] = Worker::capture_dynamic();
 
+    set_signal_status_false();
     emit start_sinusoid_gen(index[3]);
-    bcm2835_delayMicroseconds(20);
+    wait_ready_generator();
     data[3] = Worker::capture_dynamic();
     data[4] = end_value;
 
@@ -119,10 +122,10 @@ int32_t Worker::cutt_off_freq_search(int start, int end, double value_3db, int l
     int mid;
     double value_mid = 0;
     mid = (start+end)/2;
-
+    set_signal_status_false();
     qInfo() << "Cutt-Off Frequency; Searching Between " << start << " Hz and " << end << " Hz ... ";
     emit start_sinusoid_gen(mid);
-    bcm2835_delayMicroseconds(20);
+    wait_ready_generator();
     value_mid = Worker::capture_dynamic();
     loop_number = loop_number + 1;
     if (loop_number >= loop_limit)
@@ -277,6 +280,21 @@ void Worker::set_signal_status_false()
     m_mutex->unlock();
 }
 
+void Worker::wait_ready_generator()
+{
+    int time_out = 1000;
+    while( Worker::signal_is_ready() == false)
+    {
+        time_out--;
+        bcm2835_delay(1);
+        if (time_out == 0)
+        {
+            emit error_occured("Worker Thread: dynamic_test, signal_is_ready, time out error.");
+            break;
+        }
+    }
+}
+
 
 void Worker::static_real_time_start()
 {
@@ -380,6 +398,7 @@ void Worker::dynamic_test(int freq, int wave)
         emit start_square_gen(freq);
     else if(wave == SIN)
         emit start_sinusoid_gen(freq);
+<<<<<<< HEAD
     int time_out = 4000;
     while( Worker::signal_is_ready() == false)
     {
@@ -391,6 +410,9 @@ void Worker::dynamic_test(int freq, int wave)
             break;
         }
     }
+=======
+   wait_ready_generator();
+>>>>>>> 27d2b0b1a396f7a7b145d5638d002217a50b6356
     int ret = Worker::ADC_Init(DYNAMIC_MODE);
     if (ret < 0) {
         emit error_occured("Worker Thread: dynamic_test, ADC_Init, error code="+QString::number(ret));
@@ -470,6 +492,7 @@ void Worker::dynamic_test(int freq, int wave)
 
 void Worker::natural_freq_calc()
 {
+    set_signal_status_false();
     // read the configuration parameters
     int frequency = 1;
 
@@ -477,11 +500,11 @@ void Worker::natural_freq_calc()
     int end_value = 0;
 //    emit timer_stop();
     emit start_sinusoid_gen(nf_freq_start);
-    bcm2835_delay(1);
+    wait_ready_generator();
     start_value= Worker::capture_dynamic();
-    bcm2835_delay(1);
+    wait_ready_generator();
     emit start_sinusoid_gen(nf_freq_end);
-    bcm2835_delay(1);
+    wait_ready_generator();
     end_value = Worker::capture_dynamic();
 
 
@@ -545,14 +568,15 @@ void Worker::over_shoot_calc()
 
     qInfo() << "Over Shoot; 1 Hz Frequency ...";
 //    emit timer_stop();
+    set_signal_status_false();
     emit start_square_gen(2);
-    bcm2835_delay(1);
+    wait_ready_generator();
     value_1Hz = capture_square();
 
     qInfo() << "Over Shoot; 100 Hz Frequency ..";
-
+    set_signal_status_false();
     emit start_square_gen(100);
-    bcm2835_delay(1);
+    wait_ready_generator();
     value_100Hz = capture_dynamic();
 
     if(value_1Hz > 0)
@@ -599,8 +623,6 @@ bool Worker::signal_is_ready()
 
     return ret;
 }
-
-
 
 void Worker::static_real_time()
 {

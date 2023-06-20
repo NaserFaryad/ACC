@@ -357,7 +357,6 @@ void PiGPIO::run()
             g_mutex->lock();
             *signal_status = true;
             g_mutex->unlock();
-//            emit signal_generated();
             ret = Aux_Spi_Init(&max31865_spi_dev, 2500000, SPI_MODE_3, 0, SPIDEV_AUX_SPI_CS2);
             if (ret < 0)
                 emit error_occured("PiGPIO Thread: run loop, error code="+QString::number(AUX_SPI_INIT_ERROR));
