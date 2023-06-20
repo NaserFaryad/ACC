@@ -9,6 +9,12 @@
 sudo apt install samba
 sudo apt install winbind
 ```
+
+change this line to the interface name you want to bind.
+```
+interfaces = eth0
+```
+
 ### SPI
 #### add this line at the end of  `/boot/config.txt` file to enable aux spi (spi 6).
 ```
