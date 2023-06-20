@@ -1,7 +1,12 @@
 # ACC
 
+
+### Samba
+[Setup samba](https://www.makeuseof.com/set-up-network-shared-folder-ubuntu-with-samba/)
+
 #### Run this command.
 ```
+sudo apt install samba
 sudo apt install winbind
 ```
 ### SPI
