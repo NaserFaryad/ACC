@@ -239,9 +239,7 @@ int32_t Worker::capture_square()
             qInfo() << "capture_square: read ADC value failed. error code: " << ret;
             i = sample_number;
         }
-//        if (Value & 0x800000)
-//            Value |= 0xFF000000;
-
+        Value = Value - 8388607;
         if(Value > 0){
             max_sum = max_sum + Value;
             max_counter = max_counter + 1;
@@ -257,7 +255,7 @@ int32_t Worker::capture_square()
     if(max_counter > 0)
         avg_max = max_sum / max_counter;
     range = int32_t(avg_max - avg_min);
-
+    qInfo() << " >>>>>>> Range: " << range << " Ave Max: " << avg_max << " Ave Min: " << avg_min;
     return range;
 
 }
@@ -382,7 +380,7 @@ void Worker::dynamic_test(int freq, int wave)
         emit start_square_gen(freq);
     else if(wave == SIN)
         emit start_sinusoid_gen(freq);
-    int time_out = 1000;
+    int time_out = 4000;
     while( Worker::signal_is_ready() == false)
     {
         time_out--;
