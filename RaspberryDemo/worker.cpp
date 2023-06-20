@@ -398,21 +398,7 @@ void Worker::dynamic_test(int freq, int wave)
         emit start_square_gen(freq);
     else if(wave == SIN)
         emit start_sinusoid_gen(freq);
-<<<<<<< HEAD
-    int time_out = 4000;
-    while( Worker::signal_is_ready() == false)
-    {
-        time_out--;
-        bcm2835_delay(1);
-        if (time_out == 0)
-        {
-            emit error_occured("Worker Thread: dynamic_test, signal_is_ready, time out error.");
-            break;
-        }
-    }
-=======
-   wait_ready_generator();
->>>>>>> 27d2b0b1a396f7a7b145d5638d002217a50b6356
+    wait_ready_generator();
     int ret = Worker::ADC_Init(DYNAMIC_MODE);
     if (ret < 0) {
         emit error_occured("Worker Thread: dynamic_test, ADC_Init, error code="+QString::number(ret));
