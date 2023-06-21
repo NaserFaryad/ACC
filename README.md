@@ -47,7 +47,12 @@ dtoverlay=disable-bt
 [https://raspberrytips.com/time-sync-raspberry-pi/](https://raspberrytips.com/time-sync-raspberry-pi/)
 
 ### Qt dependencies
-##### First uncomment this line:
+##### Run this commnd
+```
+sudo nano /etc/apt/sources.list
+```
+
+##### Uncomment this line:
 ```
 #deb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi
 ```
