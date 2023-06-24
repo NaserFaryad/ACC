@@ -57,3 +57,7 @@ sudo nano /etc/apt/sources.list
 #deb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi
 ```
 ##### Then run `qt.sh` script.
+
+###
+#### Auto mount USB Drive
+[Auto Mount](https://raspberrypi.stackexchange.com/questions/66169/auto-mount-usb-stick-on-plug-in-without-uuid/66324#66324)
