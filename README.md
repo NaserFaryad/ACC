@@ -60,5 +60,5 @@ sudo nano /etc/apt/sources.list
 
 ###
 #### Auto mount USB Drive
-[Auto Mount](https://raspberrypi.stackexchange.com/questions/66169/auto-mount-usb-stick-on-plug-in-without-uuid/66324#66324)
-[--- Check - Not tested](https://www.baeldung.com/linux/automount-usb-device)
+##### [Auto Mount](https://raspberrypi.stackexchange.com/questions/66169/auto-mount-usb-stick-on-plug-in-without-uuid/66324#66324)
+##### [--- Check - Not tested](https://www.baeldung.com/linux/automount-usb-device)
